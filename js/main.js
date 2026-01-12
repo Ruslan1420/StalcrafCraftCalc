@@ -1,4 +1,4 @@
-// js/main.js - финальная версия без всплывающих окон
+// js/main.js - с сахаром как вводимым ресурсом
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Stalcraft Calculator loaded');
     
@@ -30,13 +30,13 @@ function initCalculator() {
     const slastInput = document.getElementById('input-slast');
     const dustInput = document.getElementById('input-dust');
     const plasmaInput = document.getElementById('input-plasma');
+    const sugarInput = document.getElementById('input-sugar'); // Новое поле
     
     const priceSlastInput = document.getElementById('price-slast');
     const priceDustInput = document.getElementById('price-dust');
     const pricePlasmaInput = document.getElementById('price-plasma');
     const priceEnergyInput = document.getElementById('price-energy');
     const priceCatalystInput = document.getElementById('price-catalyst');
-    const priceSugarInput = document.getElementById('price-sugar');
     const useTaxCheckbox = document.getElementById('use-tax');
     
     // Элементы вывода
@@ -44,9 +44,6 @@ function initCalculator() {
     const resultCost = document.getElementById('result-cost');
     const resultRevenue = document.getElementById('result-revenue');
     const resultProfit = document.getElementById('result-profit');
-    const sugarOutput = document.getElementById('sugar-output');
-    const sugarCostElem = document.getElementById('sugar-cost');
-    const catalystCostElem = document.getElementById('catalyst-cost');
     
     // ========== СОХРАНЕНИЕ В LOCALSTORAGE ==========
     
@@ -58,6 +55,7 @@ function initCalculator() {
                 slast: slastInput.value,
                 dust: dustInput.value,
                 plasma: plasmaInput.value,
+                sugar: sugarInput.value, // Сохраняем сахар
                 
                 // Цены
                 priceSlast: priceSlastInput.value,
@@ -94,6 +92,7 @@ function initCalculator() {
                 if (data.slast !== undefined) slastInput.value = data.slast;
                 if (data.dust !== undefined) dustInput.value = data.dust;
                 if (data.plasma !== undefined) plasmaInput.value = data.plasma;
+                if (data.sugar !== undefined) sugarInput.value = data.sugar; // Загружаем сахар
                 
                 // Загружаем цены
                 if (data.priceSlast !== undefined) priceSlastInput.value = data.priceSlast;
@@ -112,92 +111,190 @@ function initCalculator() {
         }
     }
     
-    // ========== ОГРАНИЧЕНИЕ ВВОДА ==========
+    // ========== ОБРАБОТКА ДЕСЯТИЧНЫХ ЗНАЧЕНИЙ ==========
     
-    // Функция для ограничения ввода (макс 9 символов)
-    function limitInputLength(inputElement, maxLength = 9) {
-        inputElement.addEventListener('input', function() {
-            let value = this.value;
+    // Обработчик для поля энергии
+    function setupEnergyInput() {
+        priceEnergyInput.addEventListener('input', function() {
+            // Заменяем запятую на точку
+            let value = this.value.replace(',', '.');
             
-            // Удаляем все нецифровые символы (кроме точки и минуса)
-            value = value.replace(/[^\d.-]/g, '');
+            // Удаляем все символы кроме цифр и точки
+            value = value.replace(/[^\d.]/g, '');
             
-            // Ограничиваем длину
-            if (value.length > maxLength) {
-                value = value.substring(0, maxLength);
+            // Удаляем лишние точки
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Ограничиваем 2 знаками после запятой
+            if (parts.length === 2) {
+                parts[1] = parts[1].slice(0, 2);
+                value = parts[0] + '.' + parts[1];
             }
             
             this.value = value;
+            
+            // Обновляем расчет
+            calculate();
+            saveAllData();
         });
     }
     
-    // Применяем ограничение ко всем инпутам
-    limitInputLength(slastInput);
-    limitInputLength(dustInput);
-    limitInputLength(plasmaInput);
-    limitInputLength(priceSlastInput);
-    limitInputLength(priceDustInput);
-    limitInputLength(pricePlasmaInput);
-    limitInputLength(priceEnergyInput);
-    limitInputLength(priceCatalystInput);
+    // ========== АВТОМАТИЧЕСКИЙ РАСЧЕТ РЕСУРСОВ ИЗ САХАРА ==========
+    
+    // Рассчитать ресурсы из сахара
+    function calculateResourcesFromSugar(sugarAmount) {
+        const sugar = parseFloat(sugarAmount) || 0;
+        
+        // Сколько можно сделать катализаторов из этого сахара?
+        const catalystCrafts = Math.floor(sugar / CRAFT.CATALYST.SUGAR);
+        
+        // Для этого количества катализаторов нужно:
+        const neededSugar = catalystCrafts * CRAFT.CATALYST.SUGAR;
+        const neededDustForCatalyst = catalystCrafts * CRAFT.CATALYST.DUST;
+        
+        // Для производства этого сахара нужно:
+        const sugarCrafts = Math.ceil(neededSugar / CRAFT.SUGAR.OUTPUT);
+        const neededSlatsForSugar = sugarCrafts * CRAFT.SUGAR.SLATS;
+        const neededPlasmaForSugar = sugarCrafts * CRAFT.SUGAR.PLASMA;
+        const neededDustForSugar = sugarCrafts * CRAFT.SUGAR.DUST;
+        
+        return {
+            sugar: neededSugar,
+            slast: neededSlatsForSugar,
+            plasma: neededPlasmaForSugar,
+            dust: neededDustForSugar + neededDustForCatalyst,
+            totalDust: neededDustForSugar + neededDustForCatalyst,
+            catalystCrafts: catalystCrafts
+        };
+    }
+    
+    // Рассчитать сахар из ресурсов
+    function calculateSugarFromResources(slast, dust, plasma) {
+        // Сколько можно сделать сахара из ресурсов?
+        const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
+        const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
+        const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
+        
+        const maxSugarCrafts = Math.min(sugarFromSlats, sugarFromPlasma, sugarFromDust);
+        const sugarProduced = maxSugarCrafts * CRAFT.SUGAR.OUTPUT;
+        
+        return {
+            sugar: sugarProduced,
+            usedSlats: maxSugarCrafts * CRAFT.SUGAR.SLATS,
+            usedPlasma: maxSugarCrafts * CRAFT.SUGAR.PLASMA,
+            usedDust: maxSugarCrafts * CRAFT.SUGAR.DUST
+        };
+    }
     
     // ========== ОБРАБОТЧИКИ ВВОДА ==========
     
-    // Общая функция обработки ввода
-    function handleInput(inputElement, updateOtherInputs) {
+    // Общая функция обработки ввода ресурсов
+    function handleResourceInput(inputElement, updateFunction) {
         const value = parseFloat(inputElement.value) || 0;
         
-        // Обновляем другие инпуты если нужно
-        if (updateOtherInputs) {
-            updateOtherInputs(value);
+        if (updateFunction) {
+            updateFunction(value);
         }
         
-        // Считаем и сохраняем
         calculate();
         saveAllData();
     }
     
-    // Обработчики ресурсов
+    // При изменении сахара
+    sugarInput.addEventListener('input', function() {
+        const sugarAmount = parseFloat(this.value) || 0;
+        
+        if (sugarAmount > 0) {
+            const resources = calculateResourcesFromSugar(sugarAmount);
+            
+            slastInput.value = resources.slast;
+            plasmaInput.value = resources.plasma;
+            dustInput.value = resources.dust;
+        }
+        
+        calculate();
+        saveAllData();
+    });
+    
+    // При изменении сластены
     slastInput.addEventListener('input', function() {
-        handleInput(this, function(value) {
-            plasmaInput.value = Math.floor(value / 10);
-            dustInput.value = Math.floor(value * 30);
-        });
+        const slast = parseFloat(this.value) || 0;
+        
+        // Автоматическая связь
+        plasmaInput.value = Math.floor(slast / 10);
+        dustInput.value = Math.floor(slast * 30);
+        
+        // Рассчитываем сколько сахара получится
+        const dust = parseFloat(dustInput.value) || 0;
+        const plasma = parseFloat(plasmaInput.value) || 0;
+        
+        const sugarData = calculateSugarFromResources(slast, dust, plasma);
+        sugarInput.value = sugarData.sugar;
+        
+        calculate();
+        saveAllData();
     });
     
+    // При изменении пыли
     dustInput.addEventListener('input', function() {
-        handleInput(this, function(value) {
-            slastInput.value = Math.floor(value / 30);
-            plasmaInput.value = Math.floor(value / 300);
-        });
+        const dust = parseFloat(this.value) || 0;
+        
+        // Автоматическая связь
+        slastInput.value = Math.floor(dust / 30);
+        plasmaInput.value = Math.floor(dust / 300);
+        
+        // Рассчитываем сколько сахара получится
+        const slast = parseFloat(slastInput.value) || 0;
+        const plasma = parseFloat(plasmaInput.value) || 0;
+        
+        const sugarData = calculateSugarFromResources(slast, dust, plasma);
+        sugarInput.value = sugarData.sugar;
+        
+        calculate();
+        saveAllData();
     });
     
+    // При изменении плазмы
     plasmaInput.addEventListener('input', function() {
-        handleInput(this, function(value) {
-            slastInput.value = value * 10;
-            dustInput.value = value * 300;
-        });
+        const plasma = parseFloat(this.value) || 0;
+        
+        // Автоматическая связь
+        slastInput.value = plasma * 10;
+        dustInput.value = plasma * 300;
+        
+        // Рассчитываем сколько сахара получится
+        const slast = parseFloat(slastInput.value) || 0;
+        const dust = parseFloat(dustInput.value) || 0;
+        
+        const sugarData = calculateSugarFromResources(slast, dust, plasma);
+        sugarInput.value = sugarData.sugar;
+        
+        calculate();
+        saveAllData();
     });
     
     // Обработчики цен
     priceSlastInput.addEventListener('input', function() {
-        handleInput(this);
+        calculate();
+        saveAllData();
     });
     
     priceDustInput.addEventListener('input', function() {
-        handleInput(this);
+        calculate();
+        saveAllData();
     });
     
     pricePlasmaInput.addEventListener('input', function() {
-        handleInput(this);
-    });
-    
-    priceEnergyInput.addEventListener('input', function() {
-        handleInput(this);
+        calculate();
+        saveAllData();
     });
     
     priceCatalystInput.addEventListener('input', function() {
-        handleInput(this);
+        calculate();
+        saveAllData();
     });
     
     // Обработчик налога
@@ -205,6 +302,9 @@ function initCalculator() {
         calculate();
         saveAllData();
     });
+    
+    // Настраиваем поле энергии
+    setupEnergyInput();
     
     // Загружаем сохраненные данные при запуске
     loadSavedData();
@@ -214,86 +314,99 @@ function initCalculator() {
         const slast = parseFloat(slastInput.value) || 0;
         const dust = parseFloat(dustInput.value) || 0;
         const plasma = parseFloat(plasmaInput.value) || 0;
+        const sugar = parseFloat(sugarInput.value) || 0;
         
         const priceSlast = parseFloat(priceSlastInput.value) || 7800;
         const priceDust = parseFloat(priceDustInput.value) || 275;
         const pricePlasma = parseFloat(pricePlasmaInput.value) || 1500;
-        const priceEnergy = parseFloat(priceEnergyInput.value) || 1.2;
+        const priceEnergy = parseFloat(priceEnergyInput.value.replace(',', '.')) || 1.2;
         const priceCatalyst = parseFloat(priceCatalystInput.value) || 4135;
         const useTax = useTaxCheckbox.checked;
         
-        // 1. Рассчитываем сахар
-        const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
-        const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
-        const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
+        // Рассчитываем что можно сделать
+        let catalystsProduced = 0;
+        let totalCost = 0;
         
-        const maxSugarCrafts = Math.min(sugarFromSlats, sugarFromPlasma, sugarFromDust);
-        const sugarProduced = maxSugarCrafts * CRAFT.SUGAR.OUTPUT;
+        // Если указан сахар - используем логику "от сахара"
+        if (sugar > 0) {
+            // Сколько можно сделать катализаторов из этого сахара?
+            const catalystCrafts = Math.floor(sugar / CRAFT.CATALYST.SUGAR);
+            
+            // Нужные ресурсы для этого количества катализаторов
+            const neededSugar = catalystCrafts * CRAFT.CATALYST.SUGAR;
+            const neededDustForCatalyst = catalystCrafts * CRAFT.CATALYST.DUST;
+            
+            // Для производства этого сахара нужно:
+            const sugarCrafts = Math.ceil(neededSugar / CRAFT.SUGAR.OUTPUT);
+            const neededSlatsForSugar = sugarCrafts * CRAFT.SUGAR.SLATS;
+            const neededPlasmaForSugar = sugarCrafts * CRAFT.SUGAR.PLASMA;
+            const neededDustForSugar = sugarCrafts * CRAFT.SUGAR.DUST;
+            
+            catalystsProduced = catalystCrafts * CRAFT.CATALYST.OUTPUT;
+            
+            // Затраты
+            const costSlats = neededSlatsForSugar * priceSlast;
+            const costPlasma = neededPlasmaForSugar * pricePlasma;
+            const costDust = (neededDustForSugar + neededDustForCatalyst) * priceDust;
+            const totalEnergyUsed = (sugarCrafts + catalystCrafts) * CRAFT.ENERGY_PER_CRAFT;
+            const costEnergy = totalEnergyUsed * priceEnergy;
+            
+            totalCost = costSlats + costPlasma + costDust + costEnergy;
+        } else {
+            // Старая логика - от ресурсов
+            const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
+            const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
+            const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
+            
+            const maxSugarCrafts = Math.min(sugarFromSlats, sugarFromPlasma, sugarFromDust);
+            const sugarProduced = maxSugarCrafts * CRAFT.SUGAR.OUTPUT;
+            
+            const remainingDust = dust - (maxSugarCrafts * CRAFT.SUGAR.DUST);
+            
+            const catalystFromSugar = Math.floor(sugarProduced / CRAFT.CATALYST.SUGAR);
+            const catalystFromDust = Math.floor(remainingDust / CRAFT.CATALYST.DUST);
+            
+            const maxCatalystCrafts = Math.min(catalystFromSugar, catalystFromDust);
+            catalystsProduced = maxCatalystCrafts * CRAFT.CATALYST.OUTPUT;
+            
+            const usedSlatsForSugar = maxSugarCrafts * CRAFT.SUGAR.SLATS;
+            const usedPlasmaForSugar = maxSugarCrafts * CRAFT.SUGAR.PLASMA;
+            const usedDustForSugar = maxSugarCrafts * CRAFT.SUGAR.DUST;
+            const usedDustForCatalyst = maxCatalystCrafts * CRAFT.CATALYST.DUST;
+            
+            const totalUsedSlats = usedSlatsForSugar;
+            const totalUsedPlasma = usedPlasmaForSugar;
+            const totalUsedDust = usedDustForSugar + usedDustForCatalyst;
+            const totalEnergyUsed = (maxSugarCrafts + maxCatalystCrafts) * CRAFT.ENERGY_PER_CRAFT;
+            
+            const costSlats = totalUsedSlats * priceSlast;
+            const costPlasma = totalUsedPlasma * pricePlasma;
+            const costDust = totalUsedDust * priceDust;
+            const costEnergy = totalEnergyUsed * priceEnergy;
+            
+            totalCost = costSlats + costPlasma + costDust + costEnergy;
+        }
         
-        // 2. Рассчитываем катализаторы
-        const remainingDust = dust - (maxSugarCrafts * CRAFT.SUGAR.DUST);
-        
-        const catalystFromSugar = Math.floor(sugarProduced / CRAFT.CATALYST.SUGAR);
-        const catalystFromDust = Math.floor(remainingDust / CRAFT.CATALYST.DUST);
-        
-        const maxCatalystCrafts = Math.min(catalystFromSugar, catalystFromDust);
-        const catalystsProduced = maxCatalystCrafts * CRAFT.CATALYST.OUTPUT;
-        
-        // 3. Использованные ресурсы
-        const usedSlatsForSugar = maxSugarCrafts * CRAFT.SUGAR.SLATS;
-        const usedPlasmaForSugar = maxSugarCrafts * CRAFT.SUGAR.PLASMA;
-        const usedDustForSugar = maxSugarCrafts * CRAFT.SUGAR.DUST;
-        const usedSugarForCatalyst = maxCatalystCrafts * CRAFT.CATALYST.SUGAR;
-        const usedDustForCatalyst = maxCatalystCrafts * CRAFT.CATALYST.DUST;
-        
-        const totalUsedSlats = usedSlatsForSugar;
-        const totalUsedPlasma = usedPlasmaForSugar;
-        const totalUsedDust = usedDustForSugar + usedDustForCatalyst;
-        const totalEnergyUsed = (maxSugarCrafts + maxCatalystCrafts) * CRAFT.ENERGY_PER_CRAFT;
-        
-        // 4. Затраты
-        const costSlats = totalUsedSlats * priceSlast;
-        const costPlasma = totalUsedPlasma * pricePlasma;
-        const costDust = totalUsedDust * priceDust;
-        const costEnergy = totalEnergyUsed * priceEnergy;
-        const totalCost = costSlats + costPlasma + costDust + costEnergy;
-        
-        // 5. Выручка
+        // Выручка
         let revenue = catalystsProduced * priceCatalyst;
         if (useTax) {
             revenue = revenue * 0.95;
         }
         
-        // 6. Прибыль
+        // Прибыль
         const profit = revenue - totalCost;
         
-        // 7. Себестоимость
-        const sugarCost = (CRAFT.SUGAR.SLATS * priceSlast +
-                          CRAFT.SUGAR.PLASMA * pricePlasma +
-                          CRAFT.SUGAR.DUST * priceDust +
-                          CRAFT.ENERGY_PER_CRAFT * priceEnergy) / CRAFT.SUGAR.OUTPUT;
-        
-        const catalystCost = (CRAFT.CATALYST.SUGAR * sugarCost +
-                             CRAFT.CATALYST.DUST * priceDust +
-                             CRAFT.ENERGY_PER_CRAFT * priceEnergy) / CRAFT.CATALYST.OUTPUT;
-        
-        // 8. Обновление интерфейса
-        updateResults(catalystsProduced, totalCost, revenue, profit, sugarProduced, sugarCost, catalystCost);
+        // Обновление интерфейса
+        updateResults(catalystsProduced, totalCost, revenue, profit);
     }
     
-    function updateResults(catalysts, cost, revenue, profit, sugar, sugarCost, catalystCost) {
+    function updateResults(catalysts, cost, revenue, profit) {
         resultOutput.textContent = catalysts.toLocaleString('ru-RU');
         resultCost.textContent = formatMoney(cost);
         resultRevenue.textContent = formatMoney(revenue);
         resultProfit.textContent = formatMoney(profit);
         
         resultProfit.style.color = profit >= 0 ? '#00ff9d' : '#ff4757';
-        
-        sugarOutput.textContent = sugar.toLocaleString('ru-RU');
-        priceSugarInput.value = sugarCost.toFixed(1);
-        
-        sugarCostElem.textContent = formatMoney(sugarCost);
-        catalystCostElem.textContent = formatMoney(catalystCost);
     }
     
     function formatMoney(amount) {
