@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stalcraft | Калькулятор катализаторов</title>
     
+    <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
+        <!-- Шапка -->
         <header class="header">
             <div class="logo">
                 <i class="fas fa-flask"></i>
@@ -19,6 +21,7 @@
         </header>
         
         <main class="main-content">
+            <!-- Верхний блок: Цена и результаты -->
             <div class="top-section">
                 <div class="price-box">
                     <div class="price-control">
@@ -65,7 +68,9 @@
                 </div>
             </div>
             
+            <!-- Нижний блок: Ресурсы и цены -->
             <div class="bottom-section">
+                <!-- Левая часть: Ресурсы -->
                 <div class="resources-card">
                     <h2><i class="fas fa-box"></i> Ресурсы</h2>
                     
@@ -103,6 +108,7 @@
                         </div>
                     </div>
                     
+                    <!-- Процесс крафта -->
                     <div class="craft-process">
                         <h3><i class="fas fa-industry"></i> Процесс крафта</h3>
                         <div class="craft-steps">
@@ -124,6 +130,7 @@
                     </div>
                 </div>
                 
+                <!-- Правая часть: Цены -->
                 <div class="pricing-card">
                     <h2><i class="fas fa-coins"></i> Цены</h2>
                     
@@ -173,6 +180,7 @@
                         </div>
                     </div>
                     
+                    <!-- Энергия в ценообразовании -->
                     <div class="energy-price">
                         <div class="price-header">
                             <i class="fas fa-bolt"></i>
@@ -184,6 +192,7 @@
                         </div>
                     </div>
                     
+                    <!-- Итоговая стоимость -->
                     <div class="cost-summary">
                         <div class="summary-item">
                             <span>Себестоимость сахара:</span>
@@ -199,26 +208,9 @@
         </main>
         
         <footer class="footer">
-            <div>Stalcraft Catalyst Calculator</div>
+            <div>Stalcraft Catalyst Calculator v2.1</div>
+            <div class="hint">Используйте целые числа для ресурсов</div>
         </footer>
-    </div>
-
-    <!-- Модальное окно -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Внимание!</h3>
-                <button class="modal-close" id="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-message" id="modal-message"></div>
-                <div class="modal-hint">Введено слишком большое значение</div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-ok" id="modal-ok">Понятно</button>
-            </div>
-        </div>
     </div>
 
     <script src="js/main.js"></script>
