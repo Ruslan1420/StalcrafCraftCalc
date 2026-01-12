@@ -493,3 +493,52 @@ body {
         margin: 10px;
     }
 }
+
+/* Добавь эти стили в конец файла: */
+
+/* Убираем стрелочки у инпутов */
+.no-spinner {
+    -moz-appearance: textfield;
+}
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Для поля энергии с десятичным вводом */
+.decimal-input {
+    font-family: var(--font-body);
+    width: 100%;
+    padding: 10px 35px 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--light);
+    font-size: 16px;
+}
+
+/* Подсказка для энергии */
+.energy-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--primary);
+}
+
+.energy-hint i {
+    font-size: 14px;
+    color: var(--primary);
+}
+
+.energy-hint span {
+    color: var(--light);
+    opacity: 0.9;
+}
