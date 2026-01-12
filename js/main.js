@@ -30,9 +30,15 @@ function initCalculator() {
     const sugarCostElem = document.getElementById('sugar-cost');
     const catalystCostElem = document.getElementById('catalyst-cost');
     
-    // Элементы ошибок
-    const errorMessage = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
+    // Модальное окно
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalMessage = document.getElementById('modal-message');
+    const modalClose = document.getElementById('modal-close');
+    const modalOk = document.getElementById('modal-ok');
+    
+    // Заблокированное поле
+    let blockedInput = null;
+    let originalValue = null;
     
     // Константы крафта
     const CRAFT = {
@@ -50,113 +56,183 @@ function initCalculator() {
         ENERGY_PER_CRAFT: 1200
     };
     
-    // Забавные сообщения
-    const funnyMessages = [
-        "Ты чего делаешь?",
-        "Ого! Серьезная партия!",
-        "Кто-то собрался крафтить на всю фракцию!",
-        "Не многовато ли?",
-        "Босс, ты уверен?",
-        "Столько ресурсов хватит на месяц!",
-        "Проверь расчеты еще раз",
-        "Может, поменьше?",
-        "Такой партией можно рынок обрушить!",
-        "Эй, полегче с ресурсами!"
-    ];
-    
-    // Получить случайное сообщение
-    function getRandomMessage() {
-        return funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+    // Показать модальное окно
+    function showModal(message, inputElement) {
+        blockedInput = inputElement;
+        originalValue = inputElement.value;
+        
+        modalMessage.textContent = message;
+        modalOverlay.style.display = 'flex';
+        document.body.classList.add('modal-open');
+        
+        // Блокируем все инпуты
+        disableAllInputs(true);
     }
     
-    // Показать предупреждение
-    function showWarning(value, resourceName) {
-        if (value > 100000) {
-            errorText.textContent = `${getRandomMessage()} ${value.toLocaleString('ru-RU')} ${resourceName}?`;
-            errorMessage.style.display = 'flex';
-        } else if (value > 10000) {
-            errorText.textContent = `Большая партия: ${value.toLocaleString('ru-RU')} ${resourceName}`;
-            errorMessage.style.display = 'flex';
-        } else {
-            errorMessage.style.display = 'none';
+    // Закрыть модальное окно
+    function closeModal() {
+        modalOverlay.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        
+        // Восстанавливаем исходное значение
+        if (blockedInput && originalValue !== null) {
+            blockedInput.value = originalValue;
+        }
+        
+        // Разблокируем инпуты
+        disableAllInputs(false);
+        
+        // Сбрасываем значения
+        blockedInput = null;
+        originalValue = null;
+        
+        // Пересчитываем
+        calculate();
+    }
+    
+    // Блокировка/разблокировка инпутов
+    function disableAllInputs(disable) {
+        const inputs = [
+            slastInput, dustInput, plasmaInput,
+            priceSlastInput, priceDustInput, pricePlasmaInput,
+            priceEnergyInput, priceCatalystInput
+        ];
+        
+        inputs.forEach(input => {
+            if (input) {
+                input.disabled = disable;
+            }
+        });
+        
+        if (useTaxCheckbox) {
+            useTaxCheckbox.disabled = disable;
         }
     }
+    
+    // Проверка значения
+    function checkInputValue(value, inputElement, resourceName) {
+        if (value > 10000) {
+            const messages = [
+                `Ты чего делаешь? ${value.toLocaleString('ru-RU')} ${resourceName}?`,
+                `Ого! ${value.toLocaleString('ru-RU')} ${resourceName}? Серьезно?`,
+                `Столько ${resourceName} (${value.toLocaleString('ru-RU')})? Ты уверен?`,
+                `${value.toLocaleString('ru-RU')} ${resourceName}? Не многовато ли?`,
+                `Куда столько ${resourceName} (${value.toLocaleString('ru-RU')})?`
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showModal(randomMessage, inputElement);
+            return false;
+        }
+        return true;
+    }
+    
+    // Обработчики модального окна
+    modalClose.addEventListener('click', closeModal);
+    modalOk.addEventListener('click', closeModal);
+    
+    // Закрытие по клику на оверлей
+    modalOverlay.addEventListener('click', function(event) {
+        if (event.target === modalOverlay) {
+            closeModal();
+        }
+    });
+    
+    // Закрытие по Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && modalOverlay.style.display === 'flex') {
+            closeModal();
+        }
+    });
     
     // АВТОМАТИЧЕСКАЯ СВЯЗЬ РЕСУРСОВ:
     
     // При изменении сластены
     slastInput.addEventListener('input', function() {
         const slast = parseFloat(this.value) || 0;
-        showWarning(slast, 'сластены');
         
-        plasmaInput.value = Math.floor(slast / 10);
-        dustInput.value = Math.floor(slast * 30);
-        calculate();
+        if (checkInputValue(slast, this, 'сластены')) {
+            plasmaInput.value = Math.floor(slast / 10);
+            dustInput.value = Math.floor(slast * 30);
+            calculate();
+        }
     });
     
     // При изменении пыли
     dustInput.addEventListener('input', function() {
         const dust = parseFloat(this.value) || 0;
-        showWarning(dust, 'пыли');
         
-        slastInput.value = Math.floor(dust / 30);
-        plasmaInput.value = Math.floor(dust / 300);
-        calculate();
+        if (checkInputValue(dust, this, 'пыли')) {
+            slastInput.value = Math.floor(dust / 30);
+            plasmaInput.value = Math.floor(dust / 300);
+            calculate();
+        }
     });
     
     // При изменении плазмы
     plasmaInput.addEventListener('input', function() {
         const plasma = parseFloat(this.value) || 0;
-        showWarning(plasma, 'плазмы');
         
-        slastInput.value = plasma * 10;
-        dustInput.value = plasma * 300;
-        calculate();
+        if (checkInputValue(plasma, this, 'плазмы')) {
+            slastInput.value = plasma * 10;
+            dustInput.value = plasma * 300;
+            calculate();
+        }
     });
     
     // Проверка цен
-    function checkPrice(value, inputName) {
-        if (value > 1000000) {
-            errorText.textContent = `Цена ${value.toLocaleString('ru-RU')} ₽ за ${inputName}? Серьезно?`;
-            errorMessage.style.display = 'flex';
-        } else if (value > 100000) {
-            errorText.textContent = `Дороговато: ${value.toLocaleString('ru-RU')} ₽ за ${inputName}`;
-            errorMessage.style.display = 'flex';
+    function checkPrice(value, inputElement, resourceName) {
+        if (value > 100000) {
+            const messages = [
+                `Цена ${value.toLocaleString('ru-RU')} ₽ за ${resourceName}? Серьезно?`,
+                `Дороговато! ${value.toLocaleString('ru-RU')} ₽ за ${resourceName}`,
+                `Кто покупает ${resourceName} по ${value.toLocaleString('ru-RU')} ₽?`,
+                `${value.toLocaleString('ru-RU')} ₽ за ${resourceName}? Цены космос!`
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showModal(randomMessage, inputElement);
+            return false;
         }
+        return true;
     }
     
     // Реакция на все изменения цен
     priceSlastInput.addEventListener('input', function() {
         const value = parseFloat(this.value) || 0;
-        checkPrice(value, 'сластену');
-        calculate();
+        if (checkPrice(value, this, 'сластену')) {
+            calculate();
+        }
     });
     
     priceDustInput.addEventListener('input', function() {
         const value = parseFloat(this.value) || 0;
-        checkPrice(value, 'пыль');
-        calculate();
+        if (checkPrice(value, this, 'пыль')) {
+            calculate();
+        }
     });
     
     pricePlasmaInput.addEventListener('input', function() {
         const value = parseFloat(this.value) || 0;
-        checkPrice(value, 'плазму');
-        calculate();
+        if (checkPrice(value, this, 'плазму')) {
+            calculate();
+        }
     });
     
     priceEnergyInput.addEventListener('input', function() {
         const value = parseFloat(this.value) || 0;
         if (value > 100) {
-            errorText.textContent = `Энергия по ${value} ₽? Дороговато!`;
-            errorMessage.style.display = 'flex';
+            showModal(`Энергия по ${value} ₽? Дороговато!`, this);
+        } else {
+            calculate();
         }
-        calculate();
     });
     
     priceCatalystInput.addEventListener('input', function() {
         const value = parseFloat(this.value) || 0;
-        checkPrice(value, 'катализатор');
-        calculate();
+        if (checkPrice(value, this, 'катализатор')) {
+            calculate();
+        }
     });
     
     useTaxCheckbox.addEventListener('change', calculate);
