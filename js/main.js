@@ -9,6 +9,63 @@ document.addEventListener('DOMContentLoaded', function() {
     calculate();
 });
 
+// Проверяем наличие storageManager
+if (typeof storageManager === 'undefined') {
+    console.warn('Storage Manager не загружен. Загрузите storage.js');
+}
+
+// Функция для загрузки сохраненных данных в форму
+function loadSavedData() {
+    if (typeof storageManager !== 'undefined') {
+        const data = storageManager.getAllData();
+        
+        // Загружаем ресурсы
+        document.getElementById('input-slast').value = data.resources.slast;
+        document.getElementById('input-dust').value = data.resources.dust;
+        document.getElementById('input-plasma').value = data.resources.plasma;
+        
+        // Загружаем цены
+        document.getElementById('price-slast').value = data.prices.slast;
+        document.getElementById('price-dust').value = data.prices.dust;
+        document.getElementById('price-plasma').value = data.prices.plasma;
+        document.getElementById('price-energy').value = data.prices.energy;
+        document.getElementById('price-catalyst').value = data.prices.catalyst;
+        
+        // Загружаем настройки
+        document.getElementById('use-tax').checked = data.settings.useTax;
+        
+        console.log('Данные загружены из хранилища');
+    }
+}
+
+// Функция для сохранения текущих данных
+function saveCurrentData() {
+    if (typeof storageManager !== 'undefined') {
+        // Сохраняем ресурсы
+        storageManager.saveResources(
+            document.getElementById('input-slast').value,
+            document.getElementById('input-dust').value,
+            document.getElementById('input-plasma').value
+        );
+        
+        // Сохраняем цены
+        storageManager.savePrices(
+            document.getElementById('price-slast').value,
+            document.getElementById('price-dust').value,
+            document.getElementById('price-plasma').value,
+            document.getElementById('price-energy').value,
+            document.getElementById('price-catalyst').value
+        );
+        
+        // Сохраняем настройки
+        storageManager.saveSettings(
+            document.getElementById('use-tax').checked
+        );
+        
+        console.log('Данные сохранены');
+    }
+}
+
 function initCalculator() {
     // Константы крафта
     const CRAFT = {
@@ -355,3 +412,4 @@ function initCalculator() {
     // Делаем функцию глобальной для отладки
     window.calculate = calculate;
 }
+
