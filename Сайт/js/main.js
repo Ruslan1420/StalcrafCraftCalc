@@ -1,71 +1,65 @@
-// js/main.js
-import { CatalystCalculator } from './modules/catalyst.js';
-import { GasTankCalculator } from './modules/gastank.js';
-import { formatMoney } from './utils/formatters.js';
+// УБРАТЬ import/export, сделать всё в одном файле
+class CatalystCalculator {
+    constructor() {
+        this.state = {
+            resources: { slast: 1000, dust: 10000 },
+            prices: { slast: 7800, dust: 275 },
+            sellPrice: 4135,
+            useTax: true
+        };
+    }
+    
+    calculate() {
+        const output = this.state.resources.slast / 10 * 20;
+        const cost = this.state.resources.slast * this.state.prices.slast;
+        const revenue = output * this.state.sellPrice;
+        const profit = revenue - cost;
+        
+        return {
+            output: Math.floor(output),
+            cost: Math.floor(cost),
+            revenue: Math.floor(revenue),
+            profit: Math.floor(profit)
+        };
+    }
+}
 
+// ВСЯ ЛОГИКА В ОДНОМ ФАЙЛЕ
 class App {
     constructor() {
-        this.calculators = {
-            catalyst: new CatalystCalculator(),
-            gastank: new GasTankCalculator()
-        };
-        
-        this.currentTab = 'catalyst';
+        this.calculator = new CatalystCalculator();
         this.init();
     }
     
     init() {
-        // Загрузка сохраненных данных
-        this.calculators.catalyst.loadFromStorage();
+        // Настройка полей
+        document.getElementById('catalyst-slast').value = this.calculator.state.resources.slast;
+        document.getElementById('catalyst-dust').value = this.calculator.state.resources.dust;
         
-        // Навешиваем обработчики
-        this.bindEvents();
-        
-        // Первый расчет
-        this.updateUI();
-    }
-    
-    bindEvents() {
-        // Переключение вкладок
-        document.querySelectorAll('[data-tab]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.switchTab(e.target.dataset.tab);
-            });
-        });
-        
-        // Изменение значений
+        // Обработчики
         document.getElementById('catalyst-slast').addEventListener('input', (e) => {
-            this.calculators.catalyst.updateResource('slast', parseFloat(e.target.value));
+            const value = parseFloat(e.target.value) || 0;
+            this.calculator.state.resources.slast = value;
+            this.calculator.state.resources.dust = value * 10;
+            document.getElementById('catalyst-dust').value = value * 10;
             this.updateUI();
-            this.calculators.catalyst.saveToStorage();
         });
-    }
-    
-    switchTab(tabName) {
-        this.currentTab = tabName;
         
-        // Показываем/скрываем секции
-        document.querySelectorAll('.tab-content').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(`${tabName}-section`).classList.add('active');
-        
-        // Обновляем UI
         this.updateUI();
     }
     
     updateUI() {
-        const results = this.calculators[this.currentTab].calculate();
-        
-        // Обновляем DOM
-        if (this.currentTab === 'catalyst') {
-            document.getElementById('catalyst-results').innerHTML = `
-                <div>Катализаторов: ${results.output}</div>
-                <div>Прибыль: ${formatMoney(results.profit)}</div>
-            `;
-        }
+        const results = this.calculator.calculate();
+        document.getElementById('catalyst-results').innerHTML = `
+            <div>Катализаторов: ${results.output}</div>
+            <div>Прибыль: ${results.profit.toLocaleString()} ₽</div>
+        `;
     }
 }
 
+// Запуск
+new App();
+
 // Запускаем приложение
+
 const app = new App();
