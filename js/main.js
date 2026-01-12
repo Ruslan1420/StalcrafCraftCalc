@@ -30,14 +30,14 @@ function initCalculator() {
     const slastInput = document.getElementById('input-slast');
     const dustInput = document.getElementById('input-dust');
     const plasmaInput = document.getElementById('input-plasma');
-    const sugarInput = document.getElementById('input-sugar'); // Новое поле
+    const sugarInput = document.getElementById('input-sugar');
     
     const priceSlastInput = document.getElementById('price-slast');
     const priceDustInput = document.getElementById('price-dust');
     const pricePlasmaInput = document.getElementById('price-plasma');
     const priceEnergyInput = document.getElementById('price-energy');
     const priceCatalystInput = document.getElementById('price-catalyst');
-    const priceSugarInput = document.getElementById('price-sugar'); // Поле стоимости сахара (только для отображения)
+    const priceSugarInput = document.getElementById('price-sugar');
     const useTaxCheckbox = document.getElementById('use-tax');
     
     // Элементы вывода
@@ -45,6 +45,191 @@ function initCalculator() {
     const resultCost = document.getElementById('result-cost');
     const resultRevenue = document.getElementById('result-revenue');
     const resultProfit = document.getElementById('result-profit');
+    
+    // ========== ФУНКЦИЯ ОГРАНИЧЕНИЯ ВВОДА (8 СИМВОЛОВ) ==========
+    
+    function setupInputLimits() {
+        // Максимальная длина
+        const MAX_LENGTH = 8;
+        
+        // Все числовые инпуты
+        const allNumberInputs = [
+            slastInput, dustInput, plasmaInput, sugarInput,
+            priceSlastInput, priceDustInput, pricePlasmaInput,
+            priceCatalystInput
+        ];
+        
+        allNumberInputs.forEach(input => {
+            if (input) {
+                // Ограничение максимальной длины в HTML
+                input.setAttribute('maxlength', MAX_LENGTH);
+                
+                // Обработчик ввода
+                input.addEventListener('input', function(e) {
+                    // Текущее значение
+                    let value = this.value;
+                    
+                    // Если пустое значение - оставляем как есть
+                    if (value === '') return;
+                    
+                    // Удаляем все символы кроме цифр
+                    let newValue = value.replace(/[^\d]/g, '');
+                    
+                    // Ограничиваем длину
+                    if (newValue.length > MAX_LENGTH) {
+                        newValue = newValue.substring(0, MAX_LENGTH);
+                    }
+                    
+                    // Обновляем значение если оно изменилось
+                    if (newValue !== value) {
+                        this.value = newValue;
+                    }
+                    
+                    // Показываем предупреждение если превышен лимит
+                    if (newValue.length >= MAX_LENGTH) {
+                        showLengthWarning(this, MAX_LENGTH);
+                    }
+                });
+                
+                // Обработчик вставки
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    
+                    // Фильтруем вставленный текст (только цифры)
+                    let filtered = pastedText.replace(/[^\d]/g, '');
+                    
+                    // Ограничиваем длину
+                    if (filtered.length > MAX_LENGTH) {
+                        filtered = filtered.substring(0, MAX_LENGTH);
+                        showLengthWarning(this, MAX_LENGTH);
+                    }
+                    
+                    // Вставляем отфильтрованный текст
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const currentValue = this.value;
+                    
+                    // Вычисляем новое значение
+                    const before = currentValue.substring(0, start);
+                    const after = currentValue.substring(end);
+                    const newValue = before + filtered + after;
+                    
+                    // Проверяем общую длину
+                    if (newValue.length > MAX_LENGTH) {
+                        // Обрезаем до MAX_LENGTH
+                        this.value = newValue.substring(0, MAX_LENGTH);
+                        showLengthWarning(this, MAX_LENGTH);
+                    } else {
+                        this.value = newValue;
+                    }
+                    
+                    // Перемещаем курсор
+                    this.selectionStart = this.selectionEnd = start + filtered.length;
+                    
+                    // Запускаем расчет
+                    calculate();
+                    saveAllData();
+                });
+                
+                // Показываем предупреждение при фокусе
+                input.addEventListener('focus', function() {
+                    if (this.value.length >= MAX_LENGTH) {
+                        showLengthWarning(this, MAX_LENGTH);
+                    }
+                });
+            }
+        });
+        
+        // Особый обработчик для поля энергии (десятичные числа)
+        if (priceEnergyInput) {
+            priceEnergyInput.setAttribute('maxlength', MAX_LENGTH + 3); // +3 для точки и знаков после
+            
+            priceEnergyInput.addEventListener('input', function(e) {
+                // Заменяем запятую на точку
+                let value = this.value.replace(',', '.');
+                
+                // Удаляем все символы кроме цифр и точки
+                let newValue = '';
+                let hasDot = false;
+                
+                for (let i = 0; i < value.length; i++) {
+                    const char = value[i];
+                    
+                    // Точка (только одна)
+                    if (char === '.' && !hasDot) {
+                        newValue += char;
+                        hasDot = true;
+                    }
+                    // Цифры
+                    else if (char >= '0' && char <= '9') {
+                        newValue += char;
+                    }
+                }
+                
+                // Ограничиваем общую длину
+                if (newValue.length > MAX_LENGTH + 3) { // цифры + точка + 2 знака после
+                    newValue = newValue.substring(0, MAX_LENGTH + 3);
+                }
+                
+                // Ограничиваем знаки после запятой
+                if (hasDot) {
+                    const parts = newValue.split('.');
+                    if (parts[1] && parts[1].length > 2) {
+                        parts[1] = parts[1].substring(0, 2);
+                        newValue = parts[0] + '.' + parts[1];
+                    }
+                }
+                
+                // Обновляем значение если оно изменилось
+                if (newValue !== this.value) {
+                    this.value = newValue;
+                }
+                
+                // Проверяем длину целой части
+                const intPart = newValue.split('.')[0];
+                if (intPart && intPart.length >= MAX_LENGTH) {
+                    showLengthWarning(this, MAX_LENGTH);
+                }
+            });
+        }
+        
+        console.log(`Ограничения ввода установлены (${MAX_LENGTH} символов)`);
+    }
+    
+    // Функция показа предупреждения
+    function showLengthWarning(inputElement, maxLength) {
+        // Создаем или находим тултип
+        let tooltip = inputElement.parentNode.querySelector('.length-warning');
+        
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'length-warning';
+            tooltip.innerHTML = `Максимум ${maxLength} цифр`;
+            tooltip.style.cssText = `
+                position: absolute;
+                background: #ff4757;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+                top: -30px;
+                left: 0;
+                white-space: nowrap;
+                animation: fadeIn 0.3s;
+            `;
+            inputElement.parentNode.style.position = 'relative';
+            inputElement.parentNode.appendChild(tooltip);
+            
+            // Убираем через 2 секунды
+            setTimeout(() => {
+                if (tooltip.parentNode) {
+                    tooltip.parentNode.removeChild(tooltip);
+                }
+            }, 2000);
+        }
+    }
     
     // ========== СОХРАНЕНИЕ В LOCALSTORAGE ==========
     
@@ -64,7 +249,7 @@ function initCalculator() {
                 pricePlasma: pricePlasmaInput.value,
                 priceEnergy: priceEnergyInput.value,
                 priceCatalyst: priceCatalystInput.value,
-                priceSugar: priceSugarInput.value, // Сохраняем стоимость сахара
+                priceSugar: priceSugarInput.value,
                 
                 // Настройки
                 useTax: useTaxCheckbox.checked,
@@ -77,7 +262,6 @@ function initCalculator() {
                     profit: resultProfit.textContent
                 },
                 
-                // Временная метка
                 savedAt: new Date().toISOString()
             };
             
@@ -144,6 +328,8 @@ function initCalculator() {
     
     // Обработчик для поля энергии
     function setupEnergyInput() {
+        if (!priceEnergyInput) return;
+        
         priceEnergyInput.addEventListener('input', function() {
             // Заменяем запятую на точку
             let value = this.value.replace(',', '.');
@@ -219,18 +405,6 @@ function initCalculator() {
     }
     
     // ========== ОБРАБОТЧИКИ ВВОДА ==========
-    
-    // Общая функция обработки ввода ресурсов
-    function handleResourceInput(inputElement, updateFunction) {
-        const value = parseFloat(inputElement.value) || 0;
-        
-        if (updateFunction) {
-            updateFunction(value);
-        }
-        
-        calculate();
-        saveAllData();
-    }
     
     // При изменении сахара
     sugarInput.addEventListener('input', function() {
@@ -334,6 +508,9 @@ function initCalculator() {
     
     // Настраиваем поле энергии
     setupEnergyInput();
+    
+    // Настраиваем ограничения ввода
+    setupInputLimits();
     
     // Загружаем сохраненные данные при запуске
     loadSavedData();
@@ -456,11 +633,18 @@ function initCalculator() {
     
     function formatMoney(amount) {
         if (isNaN(amount)) {
-            return '0 ₽';
+            return '0\xa0₽'; // Неразрывный пробел перед рублем
         }
-        if (Math.abs(amount) < 1000) {
-            return amount.toFixed(1) + ' ₽';
+        
+        // Форматируем большие числа
+        if (Math.abs(amount) >= 1000000) {
+            return (amount / 1000000).toFixed(2) + '\xa0млн\xa0₽';
         }
-        return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
+        if (Math.abs(amount) >= 1000) {
+            return Math.round(amount).toLocaleString('ru-RU') + '\xa0₽';
+        }
+        
+        // Для маленьких чисел
+        return amount.toFixed(1) + '\xa0₽';
     }
 }
