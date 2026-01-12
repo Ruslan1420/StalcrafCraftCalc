@@ -576,3 +576,102 @@ input {
         margin: 10px;
     }
 }
+
+/* ========== ОГРАНИЧЕНИЯ ВВОДА И ИСПРАВЛЕНИЕ РУБЛЯ ========== */
+
+/* Исправление для знака рубля (чтобы не переносился) */
+.result-value {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 1.2em !important;
+}
+
+/* Специальный класс для денежных значений */
+.money-value {
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Анимация для предупреждения */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Стиль для инпутов при превышении лимита */
+input:invalid,
+input.max-length-exceeded {
+    border-color: #ff4757 !important;
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Подсказка при наведении на инпут */
+.input-hint {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Стили для результатов с большими числами */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .result-value {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .result-value {
+        font-size: 20px !important;
+    }
+}
+
+/* Улучшенное отображение чисел */
+.result-value {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+    letter-spacing: 0.5px;
+}
+
+/* Стиль для знака рубля */
+.ruble-sign {
+    display: inline-block;
+    margin-left: 2px;
+    font-weight: normal;
+}
+
+/* Адаптивные шрифты для результатов */
+@media (max-width: 600px) {
+    .result-value {
+        font-size: 16px;
+    }
+    
+    .result-item.highlight .result-value {
+        font-size: 18px;
+    }
+}
