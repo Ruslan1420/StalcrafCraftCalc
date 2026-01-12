@@ -1,36 +1,18 @@
 // js/main.js
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Stalcraft Calculator loaded');
+    console.log('Catalyst Calculator loaded');
     
-    // Инициализация
     initCalculator();
-    
-    // Первый расчет
     calculate();
 });
 
 function initCalculator() {
-    // Константы крафта
-    const CRAFT = {
-        SUGAR: {
-            SLATS: 10,
-            PLASMA: 1,
-            DUST: 100,
-            OUTPUT: 30
-        },
-        CATALYST: {
-            SUGAR: 15,
-            DUST: 100,
-            OUTPUT: 20
-        },
-        ENERGY_PER_CRAFT: 1200
-    };
-    
-    // Получение элементов
+    // Элементы ввода ресурсов
     const slastInput = document.getElementById('input-slast');
     const dustInput = document.getElementById('input-dust');
     const plasmaInput = document.getElementById('input-plasma');
     
+    // Элементы цен
     const priceSlastInput = document.getElementById('price-slast');
     const priceDustInput = document.getElementById('price-dust');
     const pricePlasmaInput = document.getElementById('price-plasma');
@@ -48,175 +30,74 @@ function initCalculator() {
     const sugarCostElem = document.getElementById('sugar-cost');
     const catalystCostElem = document.getElementById('catalyst-cost');
     
-    // Модальное окно
-    const modalOverlay = document.getElementById('modal-overlay');
-    const modalMessage = document.getElementById('modal-message');
-    const modalClose = document.getElementById('modal-close');
-    const modalOk = document.getElementById('modal-ok');
+    // Константы крафта
+    const CRAFT = {
+        SUGAR: {
+            SLATS: 10,
+            PLASMA: 1,
+            DUST: 100,
+            OUTPUT: 30
+        },
+        CATALYST: {
+            SUGAR: 15,
+            DUST: 100,
+            OUTPUT: 20
+        },
+        ENERGY_PER_CRAFT: 1200
+    };
     
-    // Переменные для блокировки
-    let blockedInput = null;
-    let originalValue = null;
+    // АВТОМАТИЧЕСКАЯ СВЯЗЬ РЕСУРСОВ:
     
-    // Показать модальное окно
-    function showModal(message, inputElement) {
-        modalMessage.textContent = message;
-        modalOverlay.style.display = 'flex';
-        document.body.classList.add('modal-open');
-        
-        // Сохраняем ссылку на заблокированный инпут и его значение
-        blockedInput = inputElement;
-        originalValue = inputElement.value;
-    }
-    
-    // Закрыть модальное окно
-    function closeModal() {
-        modalOverlay.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        
-        // Восстанавливаем исходное значение
-        if (blockedInput && originalValue !== null) {
-            blockedInput.value = originalValue;
-            blockedInput.focus();
-        }
-        
-        // Сбрасываем значения
-        blockedInput = null;
-        originalValue = null;
-        
-        // Пересчитываем
-        calculate();
-    }
-    
-    // Проверка значения
-    function checkValue(value, input, resourceName) {
-        if (value > 10000) {
-            const messages = [
-                `Ты чего делаешь? ${value.toLocaleString('ru-RU')} ${resourceName}?`,
-                `Ого! ${value.toLocaleString('ru-RU')} ${resourceName}? Серьезно?`,
-                `${value.toLocaleString('ru-RU')} ${resourceName}? Не многовато ли?`
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            showModal(randomMessage, input);
-            return false;
-        }
-        return true;
-    }
-    
-    // Проверка цены
-    function checkPrice(value, input, resourceName) {
-        if (value > 100000) {
-            const messages = [
-                `Цена ${value.toLocaleString('ru-RU')} ₽ за ${resourceName}? Серьезно?`,
-                `Дороговато! ${value.toLocaleString('ru-RU')} ₽ за ${resourceName}`
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            showModal(randomMessage, input);
-            return false;
-        }
-        return true;
-    }
-    
-    // Настройка модального окна
-    modalClose.addEventListener('click', closeModal);
-    modalOk.addEventListener('click', closeModal);
-    
-    modalOverlay.addEventListener('click', function(event) {
-        if (event.target === modalOverlay) {
-            closeModal();
-        }
-    });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && modalOverlay.style.display === 'flex') {
-            closeModal();
-        }
-    });
-    
-    // Автоматическая связь ресурсов
-    
-    // Сластена
+    // При изменении сластены
     slastInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        
-        if (checkValue(value, this, 'сластены')) {
-            plasmaInput.value = Math.floor(value / 10);
-            dustInput.value = Math.floor(value * 30);
-            calculate();
-        }
+        const slast = parseFloat(this.value) || 0;
+        // 10 сластены = 1 плазма = 300 пыли
+        plasmaInput.value = Math.floor(slast / 10);
+        dustInput.value = Math.floor(slast * 30);
+        calculate();
     });
     
-    // Пыль
+    // При изменении пыли
     dustInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        
-        if (checkValue(value, this, 'пыли')) {
-            slastInput.value = Math.floor(value / 30);
-            plasmaInput.value = Math.floor(value / 300);
-            calculate();
-        }
+        const dust = parseFloat(this.value) || 0;
+        // 300 пыли = 10 сластены = 1 плазма
+        slastInput.value = Math.floor(dust / 30);
+        plasmaInput.value = Math.floor(dust / 300);
+        calculate();
     });
     
-    // Плазма
+    // При изменении плазмы
     plasmaInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        
-        if (checkValue(value, this, 'плазмы')) {
-            slastInput.value = value * 10;
-            dustInput.value = value * 300;
-            calculate();
-        }
+        const plasma = parseFloat(this.value) || 0;
+        // 1 плазма = 10 сластены = 300 пыли
+        slastInput.value = plasma * 10;
+        dustInput.value = plasma * 300;
+        calculate();
     });
     
-    // Обработчики цен
-    priceSlastInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        if (checkPrice(value, this, 'сластену')) {
-            calculate();
+    // Реакция на все изменения цен
+    const priceInputs = [
+        priceSlastInput, priceDustInput, pricePlasmaInput,
+        priceEnergyInput, priceCatalystInput, useTaxCheckbox
+    ];
+    
+    priceInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', calculate);
+            if (input.type === 'checkbox') {
+                input.addEventListener('change', calculate);
+            }
         }
     });
-    
-    priceDustInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        if (checkPrice(value, this, 'пыль')) {
-            calculate();
-        }
-    });
-    
-    pricePlasmaInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        if (checkPrice(value, this, 'плазму')) {
-            calculate();
-        }
-    });
-    
-    priceEnergyInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        if (value > 100) {
-            showModal(`Энергия по ${value} ₽? Дороговато!`, this);
-        } else {
-            calculate();
-        }
-    });
-    
-    priceCatalystInput.addEventListener('input', function() {
-        const value = parseFloat(this.value) || 0;
-        if (checkPrice(value, this, 'катализатор')) {
-            calculate();
-        }
-    });
-    
-    useTaxCheckbox.addEventListener('change', calculate);
     
     // Расчетная функция
     function calculate() {
-        // Получаем значения
+        // Получаем значения ресурсов
         const slast = parseFloat(slastInput.value) || 0;
         const dust = parseFloat(dustInput.value) || 0;
         const plasma = parseFloat(plasmaInput.value) || 0;
         
+        // Получаем цены
         const priceSlast = parseFloat(priceSlastInput.value) || 7800;
         const priceDust = parseFloat(priceDustInput.value) || 275;
         const pricePlasma = parseFloat(pricePlasmaInput.value) || 1500;
@@ -224,52 +105,70 @@ function initCalculator() {
         const priceCatalyst = parseFloat(priceCatalystInput.value) || 4135;
         const useTax = useTaxCheckbox.checked;
         
-        // 1. Рассчитываем сахар
+        // 1. Рассчитываем сколько можно сделать сахара
         const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
         const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
         const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
         
-        const maxSugarCrafts = Math.min(sugarFromSlats, sugarFromPlasma, sugarFromDust);
+        // Ограничивающий ресурс для сахара
+        const maxSugarCrafts = Math.min(
+            sugarFromSlats,
+            sugarFromPlasma,
+            sugarFromDust
+        );
+        
+        // Полученный сахар
         const sugarProduced = maxSugarCrafts * CRAFT.SUGAR.OUTPUT;
         
-        // 2. Рассчитываем катализаторы
+        // 2. Рассчитываем сколько можно сделать катализаторов из полученного сахара
+        // Оставшиеся ресурсы после крафта сахара
         const remainingDust = dust - (maxSugarCrafts * CRAFT.SUGAR.DUST);
         
         const catalystFromSugar = Math.floor(sugarProduced / CRAFT.CATALYST.SUGAR);
         const catalystFromDust = Math.floor(remainingDust / CRAFT.CATALYST.DUST);
         
-        const maxCatalystCrafts = Math.min(catalystFromSugar, catalystFromDust);
+        // Ограничивающий ресурс для катализаторов
+        const maxCatalystCrafts = Math.min(
+            catalystFromSugar,
+            catalystFromDust
+        );
+        
+        // Полученные катализаторы
         const catalystsProduced = maxCatalystCrafts * CRAFT.CATALYST.OUTPUT;
         
-        // 3. Использованные ресурсы
+        // 3. Рассчитываем использованные ресурсы
+        // Для сахара
         const usedSlatsForSugar = maxSugarCrafts * CRAFT.SUGAR.SLATS;
         const usedPlasmaForSugar = maxSugarCrafts * CRAFT.SUGAR.PLASMA;
         const usedDustForSugar = maxSugarCrafts * CRAFT.SUGAR.DUST;
+        
+        // Для катализаторов
         const usedSugarForCatalyst = maxCatalystCrafts * CRAFT.CATALYST.SUGAR;
         const usedDustForCatalyst = maxCatalystCrafts * CRAFT.CATALYST.DUST;
         
+        // Всего использовано
         const totalUsedSlats = usedSlatsForSugar;
         const totalUsedPlasma = usedPlasmaForSugar;
         const totalUsedDust = usedDustForSugar + usedDustForCatalyst;
         const totalEnergyUsed = (maxSugarCrafts + maxCatalystCrafts) * CRAFT.ENERGY_PER_CRAFT;
         
-        // 4. Затраты
+        // 4. Рассчитываем затраты
         const costSlats = totalUsedSlats * priceSlast;
         const costPlasma = totalUsedPlasma * pricePlasma;
         const costDust = totalUsedDust * priceDust;
         const costEnergy = totalEnergyUsed * priceEnergy;
         const totalCost = costSlats + costPlasma + costDust + costEnergy;
         
-        // 5. Выручка
+        // 5. Рассчитываем выручку
         let revenue = catalystsProduced * priceCatalyst;
         if (useTax) {
-            revenue = revenue * 0.95;
+            revenue = revenue * 0.95; // -5% налог
         }
         
-        // 6. Прибыль
+        // 6. Рассчитываем прибыль
         const profit = revenue - totalCost;
         
-        // 7. Себестоимость
+        // 7. Рассчитываем себестоимость сахара и катализатора
         const sugarCost = (CRAFT.SUGAR.SLATS * priceSlast +
                           CRAFT.SUGAR.PLASMA * pricePlasma +
                           CRAFT.SUGAR.DUST * priceDust +
@@ -279,21 +178,25 @@ function initCalculator() {
                              CRAFT.CATALYST.DUST * priceDust +
                              CRAFT.ENERGY_PER_CRAFT * priceEnergy) / CRAFT.CATALYST.OUTPUT;
         
-        // 8. Обновление интерфейса
+        // 8. Обновляем интерфейс
         updateResults(catalystsProduced, totalCost, revenue, profit, sugarProduced, sugarCost, catalystCost);
     }
     
     function updateResults(catalysts, cost, revenue, profit, sugar, sugarCost, catalystCost) {
+        // Основные результаты
         resultOutput.textContent = catalysts.toLocaleString('ru-RU');
         resultCost.textContent = formatMoney(cost);
         resultRevenue.textContent = formatMoney(revenue);
         resultProfit.textContent = formatMoney(profit);
         
+        // Цвет прибыли
         resultProfit.style.color = profit >= 0 ? '#00ff9d' : '#ff4757';
         
+        // Сахар
         sugarOutput.textContent = sugar.toLocaleString('ru-RU');
         priceSugarInput.value = sugarCost.toFixed(1);
         
+        // Себестоимости
         sugarCostElem.textContent = formatMoney(sugarCost);
         catalystCostElem.textContent = formatMoney(catalystCost);
     }
@@ -305,6 +208,5 @@ function initCalculator() {
         return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
     }
     
-    // Делаем функцию глобальной для отладки
     window.calculate = calculate;
 }
