@@ -1,4 +1,4 @@
-// js/main.js - финальная версия
+// js/main.js - финальная версия без всплывающих окон
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Stalcraft Calculator loaded');
     
@@ -47,17 +47,6 @@ function initCalculator() {
     const sugarOutput = document.getElementById('sugar-output');
     const sugarCostElem = document.getElementById('sugar-cost');
     const catalystCostElem = document.getElementById('catalyst-cost');
-    
-    // Модальное окно
-    const modalOverlay = document.getElementById('modal-overlay');
-    const modalMessage = document.getElementById('modal-message');
-    const modalClose = document.getElementById('modal-close');
-    const modalOk = document.getElementById('modal-ok');
-    
-    // Переменные
-    let blockedInput = null;
-    let originalValue = null;
-    let isProcessing = false;
     
     // ========== СОХРАНЕНИЕ В LOCALSTORAGE ==========
     
@@ -123,70 +112,39 @@ function initCalculator() {
         }
     }
     
-    // ========== ОСНОВНАЯ ЛОГИКА ==========
+    // ========== ОГРАНИЧЕНИЕ ВВОДА ==========
     
-    // Показать модальное окно
-    function showModal(message, inputElement) {
-        modalMessage.textContent = message;
-        modalOverlay.style.display = 'flex';
-        document.body.classList.add('modal-open');
-        
-        blockedInput = inputElement;
-        originalValue = inputElement.value;
+    // Функция для ограничения ввода (макс 9 символов)
+    function limitInputLength(inputElement, maxLength = 9) {
+        inputElement.addEventListener('input', function() {
+            let value = this.value;
+            
+            // Удаляем все нецифровые символы (кроме точки и минуса)
+            value = value.replace(/[^\d.-]/g, '');
+            
+            // Ограничиваем длину
+            if (value.length > maxLength) {
+                value = value.substring(0, maxLength);
+            }
+            
+            this.value = value;
+        });
     }
     
-    // Закрыть модальное окно
-    function closeModal() {
-        modalOverlay.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        
-        if (blockedInput && originalValue !== null) {
-            blockedInput.value = originalValue;
-        }
-        
-        blockedInput = null;
-        originalValue = null;
-        isProcessing = false;
-        
-        calculate();
-    }
+    // Применяем ограничение ко всем инпутам
+    limitInputLength(slastInput);
+    limitInputLength(dustInput);
+    limitInputLength(plasmaInput);
+    limitInputLength(priceSlastInput);
+    limitInputLength(priceDustInput);
+    limitInputLength(pricePlasmaInput);
+    limitInputLength(priceEnergyInput);
+    limitInputLength(priceCatalystInput);
     
-    // Настройка модального окна
-    modalClose.addEventListener('click', closeModal);
-    modalOk.addEventListener('click', closeModal);
+    // ========== ОБРАБОТЧИКИ ВВОДА ==========
     
-    modalOverlay.addEventListener('click', function(event) {
-        if (event.target === modalOverlay) {
-            closeModal();
-        }
-    });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && modalOverlay.style.display === 'flex') {
-            closeModal();
-        }
-    });
-    
-    function checkLength(inputElement, resourceName) {
-        const numValue = parseFloat(inputElement.value) || 0;
-        if (numValue > 1000000) {
-            showModal(`Слишком большое значение: ${numValue.toLocaleString('ru-RU')} ${resourceName}`, inputElement);
-            return false;
-        }
-        return true;
-    }
     // Общая функция обработки ввода
-    function handleInput(inputElement, resourceName, updateOtherInputs) {
-        if (isProcessing) return;
-        
-        isProcessing = true;
-        
-        // Проверка длины ВХОДЯЩЕГО значения (то что пользователь ввел)
-        if (!checkLength(inputElement, resourceName)) {
-            isProcessing = false;
-            return;
-        }
-        
+    function handleInput(inputElement, updateOtherInputs) {
         const value = parseFloat(inputElement.value) || 0;
         
         // Обновляем другие инпуты если нужно
@@ -197,111 +155,49 @@ function initCalculator() {
         // Считаем и сохраняем
         calculate();
         saveAllData();
-        
-        isProcessing = false;
     }
     
     // Обработчики ресурсов
     slastInput.addEventListener('input', function() {
-        handleInput(this, 'сластены', function(value) {
+        handleInput(this, function(value) {
             plasmaInput.value = Math.floor(value / 10);
             dustInput.value = Math.floor(value * 30);
         });
     });
     
     dustInput.addEventListener('input', function() {
-        handleInput(this, 'пыли', function(value) {
+        handleInput(this, function(value) {
             slastInput.value = Math.floor(value / 30);
             plasmaInput.value = Math.floor(value / 300);
         });
     });
     
     plasmaInput.addEventListener('input', function() {
-        handleInput(this, 'плазмы', function(value) {
+        handleInput(this, function(value) {
             slastInput.value = value * 10;
             dustInput.value = value * 300;
         });
     });
     
-    // Обработчики цен - БЕЗ ПРОВЕРКИ ДЛИНЫ
+    // Обработчики цен
     priceSlastInput.addEventListener('input', function() {
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        const value = parseFloat(this.value) || 0;
-        if (value > 100000) {
-            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
-            isProcessing = false;
-            return;
-        }
-        
-        calculate();
-        saveAllData();
-        isProcessing = false;
+        handleInput(this);
     });
     
     priceDustInput.addEventListener('input', function() {
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        const value = parseFloat(this.value) || 0;
-        if (value > 100000) {
-            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
-            isProcessing = false;
-            return;
-        }
-        
-        calculate();
-        saveAllData();
-        isProcessing = false;
+        handleInput(this);
     });
     
     pricePlasmaInput.addEventListener('input', function() {
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        const value = parseFloat(this.value) || 0;
-        if (value > 100000) {
-            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
-            isProcessing = false;
-            return;
-        }
-        
-        calculate();
-        saveAllData();
-        isProcessing = false;
+        handleInput(this);
     });
     
     priceEnergyInput.addEventListener('input', function() {
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        const value = parseFloat(this.value) || 0;
-        if (value > 100) {
-            showModal(`Энергия по ${value} ₽? Дороговато!`, this);
-            isProcessing = false;
-            return;
-        }
-        
-        calculate();
-        saveAllData();
-        isProcessing = false;
+        handleInput(this);
     });
     
     priceCatalystInput.addEventListener('input', function() {
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        const value = parseFloat(this.value) || 0;
-        if (value > 100000) {
-            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
-            isProcessing = false;
-            return;
-        }
-        
-        calculate();
-        saveAllData();
-        isProcessing = false;
+        handleInput(this);
     });
     
     // Обработчик налога
@@ -310,7 +206,7 @@ function initCalculator() {
         saveAllData();
     });
     
-    // Загружаем сохраненные данные при запуске (БЕЗ ПРОВЕРКИ!)
+    // Загружаем сохраненные данные при запуске
     loadSavedData();
     
     // Расчетная функция
@@ -407,4 +303,3 @@ function initCalculator() {
         return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
     }
 }
-
