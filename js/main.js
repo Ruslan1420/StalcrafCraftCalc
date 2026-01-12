@@ -37,6 +37,7 @@ function initCalculator() {
     const pricePlasmaInput = document.getElementById('price-plasma');
     const priceEnergyInput = document.getElementById('price-energy');
     const priceCatalystInput = document.getElementById('price-catalyst');
+    const priceSugarInput = document.getElementById('price-sugar'); // Поле стоимости сахара (только для отображения)
     const useTaxCheckbox = document.getElementById('use-tax');
     
     // Элементы вывода
@@ -55,7 +56,7 @@ function initCalculator() {
                 slast: slastInput.value,
                 dust: dustInput.value,
                 plasma: plasmaInput.value,
-                sugar: sugarInput.value, // Сохраняем сахар
+                sugar: sugarInput.value,
                 
                 // Цены
                 priceSlast: priceSlastInput.value,
@@ -63,9 +64,18 @@ function initCalculator() {
                 pricePlasma: pricePlasmaInput.value,
                 priceEnergy: priceEnergyInput.value,
                 priceCatalyst: priceCatalystInput.value,
+                priceSugar: priceSugarInput.value, // Сохраняем стоимость сахара
                 
                 // Настройки
                 useTax: useTaxCheckbox.checked,
+                
+                // Результаты
+                results: {
+                    output: resultOutput.textContent,
+                    cost: resultCost.textContent,
+                    revenue: resultRevenue.textContent,
+                    profit: resultProfit.textContent
+                },
                 
                 // Временная метка
                 savedAt: new Date().toISOString()
@@ -92,7 +102,7 @@ function initCalculator() {
                 if (data.slast !== undefined) slastInput.value = data.slast;
                 if (data.dust !== undefined) dustInput.value = data.dust;
                 if (data.plasma !== undefined) plasmaInput.value = data.plasma;
-                if (data.sugar !== undefined) sugarInput.value = data.sugar; // Загружаем сахар
+                if (data.sugar !== undefined) sugarInput.value = data.sugar;
                 
                 // Загружаем цены
                 if (data.priceSlast !== undefined) priceSlastInput.value = data.priceSlast;
@@ -100,11 +110,30 @@ function initCalculator() {
                 if (data.pricePlasma !== undefined) pricePlasmaInput.value = data.pricePlasma;
                 if (data.priceEnergy !== undefined) priceEnergyInput.value = data.priceEnergy;
                 if (data.priceCatalyst !== undefined) priceCatalystInput.value = data.priceCatalyst;
+                if (data.priceSugar !== undefined) priceSugarInput.value = data.priceSugar;
                 
                 // Загружаем настройки
                 if (data.useTax !== undefined) useTaxCheckbox.checked = data.useTax;
                 
+                // Загружаем результаты если они есть
+                if (data.results) {
+                    resultOutput.textContent = data.results.output || '0';
+                    resultCost.textContent = data.results.cost || '0 ₽';
+                    resultRevenue.textContent = data.results.revenue || '0 ₽';
+                    resultProfit.textContent = data.results.profit || '0 ₽';
+                    
+                    // Восстанавливаем цвет прибыли
+                    const profitText = data.results.profit || '0 ₽';
+                    const profitValue = parseFloat(profitText.replace(/[^\d.-]/g, ''));
+                    resultProfit.style.color = profitValue >= 0 ? '#00ff9d' : '#ff4757';
+                }
+                
                 console.log('Данные загружены успешно');
+                
+                // Даем время DOM обновиться и пересчитываем
+                setTimeout(() => {
+                    calculate();
+                }, 100);
             }
         } catch (error) {
             console.error('Ошибка загрузки:', error);
@@ -323,6 +352,19 @@ function initCalculator() {
         const priceCatalyst = parseFloat(priceCatalystInput.value) || 4135;
         const useTax = useTaxCheckbox.checked;
         
+        // РАСЧЕТ СТОИМОСТИ САХАРА
+        // Рассчитываем стоимость одного сахара на основе его компонентов
+        // 10 сластены + 1 плазма + 100 пыли = 30 сахара
+        const costOneSugarCraft = 
+            (CRAFT.SUGAR.SLATS * priceSlast + 
+             CRAFT.SUGAR.PLASMA * pricePlasma + 
+             CRAFT.SUGAR.DUST * priceDust + 
+             CRAFT.ENERGY_PER_CRAFT * priceEnergy) / CRAFT.SUGAR.OUTPUT;
+        
+        // Отображаем стоимость сахара (округляем до целых)
+        const sugarPrice = Math.round(costOneSugarCraft);
+        priceSugarInput.value = sugarPrice;
+        
         // Рассчитываем что можно сделать
         let catalystsProduced = 0;
         let totalCost = 0;
@@ -398,6 +440,9 @@ function initCalculator() {
         
         // Обновление интерфейса
         updateResults(catalystsProduced, totalCost, revenue, profit);
+        
+        // Сохраняем результаты
+        saveAllData();
     }
     
     function updateResults(catalysts, cost, revenue, profit) {
@@ -410,7 +455,10 @@ function initCalculator() {
     }
     
     function formatMoney(amount) {
-        if (amount < 1000) {
+        if (isNaN(amount)) {
+            return '0 ₽';
+        }
+        if (Math.abs(amount) < 1000) {
             return amount.toFixed(1) + ' ₽';
         }
         return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
