@@ -8,42 +8,89 @@
     <!-- Подключаем CSS -->
     <link rel="stylesheet" href="./css/design.css">
     <link rel="stylesheet" href="./css/layout.css">
-    <link rel="stylesheet" href="./css/components.css">
     
     <!-- Внешние библиотеки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Exo+2&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Контейнер приложения -->
-    <div id="app">
+    <div class="app-container">
         <!-- Навигация -->
         <nav class="main-nav">
-            <button data-tab="catalyst">Катализаторы</button>
-            <button data-tab="gastank">Газовые баллоны</button>
-            <button data-tab="other">Другое</button>
+            <button class="btn-primary active" data-tab="catalyst">
+                <i class="fas fa-flask"></i> Катализаторы
+            </button>
+            <button class="btn-primary" data-tab="gastank">
+                <i class="fas fa-gas-pump"></i> Газовые баллоны
+            </button>
+            <button class="btn-primary" data-tab="other">
+                <i class="fas fa-box"></i> Другое
+            </button>
         </nav>
         
         <!-- Основной контент -->
-        <main>
-            <!-- Секция катализаторов -->
-            <section id="catalyst-section" class="tab-content active">
+        <main class="tab-content active" id="catalyst-section">
+            <div class="card">
+                <h2><i class="fas fa-calculator"></i> Калькулятор катализаторов</h2>
+                
                 <div class="input-group">
-                    <label>Сласть: <input type="number" id="catalyst-slast"></label>
-                    <label>Пыль: <input type="number" id="catalyst-dust"></label>
+                    <label>
+                        <span style="color: var(--primary); font-weight: bold;">Сласть:</span>
+                        <input type="number" id="catalyst-slast" value="1000" placeholder="Введите количество сласти">
+                    </label>
+                    
+                    <label>
+                        <span style="color: var(--primary); font-weight: bold;">Пыль:</span>
+                        <input type="number" id="catalyst-dust" value="10000" readonly>
+                    </label>
+                    
+                    <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> 1 сласть = 10 пыли (автоматический расчет)
+                    </div>
                 </div>
-                <div class="results" id="catalyst-results"></div>
-            </section>
-            
-            <!-- Секция газовых баллонов -->
-            <section id="gastank-section" class="tab-content">
-                <!-- ... -->
-            </section>
+                
+                <div class="results-grid" style="margin-top: 30px;">
+                    <div class="card">
+                        <div style="font-size: 12px; color: #aaa; margin-bottom: 8px;">КАТАЛИЗАТОРОВ</div>
+                        <div id="result-output" style="font-size: 32px; font-weight: bold; color: var(--primary);">0</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="font-size: 12px; color: #aaa; margin-bottom: 8px;">СЕБЕСТОИМОСТЬ</div>
+                        <div id="result-cost" style="font-size: 24px; font-weight: bold; color: #ff4757;">0 ₽</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="font-size: 12px; color: #aaa; margin-bottom: 8px;">ВЫРУЧКА</div>
+                        <div id="result-revenue" style="font-size: 24px; font-weight: bold; color: #00ff9d;">0 ₽</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="font-size: 12px; color: #aaa; margin-bottom: 8px;">ПРИБЫЛЬ</div>
+                        <div id="result-profit" style="font-size: 32px; font-weight: bold; color: #00ff9d;">0 ₽</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Другие вкладки (скрыты) -->
+        <main class="tab-content" id="gastank-section" style="display: none;">
+            <div class="card">
+                <h2><i class="fas fa-gas-pump"></i> Газовые баллоны (скоро)</h2>
+                <p>Раздел в разработке...</p>
+            </div>
+        </main>
+        
+        <main class="tab-content" id="other-section" style="display: none;">
+            <div class="card">
+                <h2><i class="fas fa-box"></i> Другое (скоро)</h2>
+                <p>Раздел в разработке...</p>
+            </div>
         </main>
     </div>
 
-    <!-- Подключаем JavaScript в конце -->
+    <!-- Подключаем JavaScript -->
     <script src="./js/main.js"></script>
 </body>
-
 </html>
