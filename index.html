@@ -98,7 +98,7 @@
                         <div class="resource-item">
                             <div class="resource-header">
                                 <i class="fas fa-cube"></i>
-                                <span>Аномальный сахар</span>
+                                <span>Светящийся сахар</span>
                             </div>
                             <input type="number" id="input-sugar" value="0" min="0" step="1" class="no-spinner">
                         </div>
@@ -162,7 +162,17 @@
                             </div>
                         </div>
                         
-                        <!-- Убрано поле сахара -->
+                        <!-- Поле стоимости сахара (только для отображения) -->
+                        <div class="price-item disabled">
+                            <div class="price-header">
+                                <i class="fas fa-cube"></i>
+                                <span>Светящийся сахар</span>
+                            </div>
+                            <div class="price-input disabled">
+                                <input type="number" id="price-sugar" value="0" min="0" step="10" class="no-spinner" readonly disabled>
+                                <span>₽</span>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="energy-price">
