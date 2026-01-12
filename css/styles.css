@@ -701,3 +701,29 @@ input.max-length-exceeded {
         font-size: 14px !important;
     }
 }
+
+/* ========== ФИКС ДЛЯ ЗНАКА РУБЛЯ (БЕЗ АНИМАЦИЙ) ========== */
+
+/* Фиксируем знак рубля на одной строке */
+.result-value {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 1.2em !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Адаптивные шрифты для больших чисел */
+@media (max-width: 768px) {
+    .result-value {
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-value {
+        font-size: 14px !important;
+    }
+}
