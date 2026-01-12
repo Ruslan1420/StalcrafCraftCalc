@@ -1,4 +1,4 @@
-// js/main.js - исправленная версия
+// js/main.js - финальная версия
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Stalcraft Calculator loaded');
     
@@ -102,16 +102,16 @@ function initCalculator() {
                 console.log('Загружаем сохраненные данные:', data);
                 
                 // Загружаем ресурсы
-                if (data.slast) slastInput.value = data.slast;
-                if (data.dust) dustInput.value = data.dust;
-                if (data.plasma) plasmaInput.value = data.plasma;
+                if (data.slast !== undefined) slastInput.value = data.slast;
+                if (data.dust !== undefined) dustInput.value = data.dust;
+                if (data.plasma !== undefined) plasmaInput.value = data.plasma;
                 
                 // Загружаем цены
-                if (data.priceSlast) priceSlastInput.value = data.priceSlast;
-                if (data.priceDust) priceDustInput.value = data.priceDust;
-                if (data.pricePlasma) pricePlasmaInput.value = data.pricePlasma;
-                if (data.priceEnergy) priceEnergyInput.value = data.priceEnergy;
-                if (data.priceCatalyst) priceCatalystInput.value = data.priceCatalyst;
+                if (data.priceSlast !== undefined) priceSlastInput.value = data.priceSlast;
+                if (data.priceDust !== undefined) priceDustInput.value = data.priceDust;
+                if (data.pricePlasma !== undefined) pricePlasmaInput.value = data.pricePlasma;
+                if (data.priceEnergy !== undefined) priceEnergyInput.value = data.priceEnergy;
+                if (data.priceCatalyst !== undefined) priceCatalystInput.value = data.priceCatalyst;
                 
                 // Загружаем настройки
                 if (data.useTax !== undefined) useTaxCheckbox.checked = data.useTax;
@@ -167,11 +167,11 @@ function initCalculator() {
         }
     });
     
-    // ИСПРАВЛЕННАЯ ПРОВЕРКА НА 10+ СИМВОЛОВ
+    // ПРОВЕРКА ТОЛЬКО ПРИ ВВОДЕ ПОЛЬЗОВАТЕЛЯ (не при загрузке!)
     function checkLength(inputElement, resourceName) {
         const strValue = inputElement.value;
         
-        // Проверяем только если строка не пустая и больше 9 символов
+        // Проверяем только если пользователь ввел больше 9 символов
         if (strValue && strValue.length > 9) {
             showModal(`Осторожно! Вы ввели ${strValue.length} символов в поле "${resourceName}". Проверьте правильность ввода.`, inputElement);
             return false;
@@ -235,7 +235,7 @@ function initCalculator() {
         });
     });
     
-    // Обработчики цен - БЕЗ ПРОВЕРКИ ДЛИНЫ ДЛЯ ЦЕН
+    // Обработчики цен - БЕЗ ПРОВЕРКИ ДЛИНЫ
     priceSlastInput.addEventListener('input', function() {
         if (isProcessing) return;
         isProcessing = true;
@@ -322,21 +322,8 @@ function initCalculator() {
         saveAllData();
     });
     
-    // ФИКС: проверка при загрузке данных
-    function safeLoadData() {
-        // Сначала грузим данные
-        loadSavedData();
-        
-        // Затем проверяем загруженные значения
-        setTimeout(() => {
-            checkLength(slastInput, 'сластены');
-            checkLength(dustInput, 'пыли');
-            checkLength(plasmaInput, 'плазмы');
-        }, 100);
-    }
-    
-    // Загружаем сохраненные данные при запуске
-    safeLoadData();
+    // Загружаем сохраненные данные при запуске (БЕЗ ПРОВЕРКИ!)
+    loadSavedData();
     
     // Расчетная функция
     function calculate() {
