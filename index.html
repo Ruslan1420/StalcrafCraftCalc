@@ -5,232 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stalcraft Craft Calculator</title>
     
-    <!-- Подключаем CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    
-    <!-- Внешние библиотеки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Фавикон -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
-    
     <style>
-        /* Инлайн стили для гарантии загрузки */
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: #0a0e17;
             color: #e0f7ff;
             font-family: 'Exo 2', sans-serif;
+            min-height: 100vh;
         }
     </style>
 </head>
 <body>
-    <!-- Контейнер приложения -->
     <div class="app-container">
-        <!-- Навигация -->
-        <nav class="main-nav">
-            <button class="btn-primary active" data-tab="catalyst">
-                <i class="fas fa-flask"></i> Катализаторы
-            </button>
-            <button class="btn-primary" data-tab="gastank">
-                <i class="fas fa-gas-pump"></i> Газовые баллоны
-            </button>
-            <button class="btn-primary" data-tab="other">
-                <i class="fas fa-box"></i> Другое
-            </button>
-            <button class="btn-primary" data-tab="settings">
-                <i class="fas fa-cog"></i> Настройки
-            </button>
-        </nav>
+        <!-- Шапка с логотипом -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-calculator"></i>
+                <h1>Stalcraft Craft Calculator</h1>
+            </div>
+            <div class="subtitle">Расчет прибыли от крафта катализаторов</div>
+        </header>
         
-        <!-- Основной контент -->
+        <!-- Главный контент -->
         <main class="main-content">
-            <!-- Катализаторы -->
-            <div class="tab-content active" id="catalyst-section">
-                <div class="card">
-                    <h2><i class="fas fa-calculator"></i> Калькулятор катализаторов</h2>
-                    <p class="subtitle">Расчет прибыли от крафта катализаторов</p>
-                    
-                    <div class="input-group">
-                        <label>
-                            <span class="label-icon" style="color: #00f3ff;">
-                                <i class="fas fa-gem"></i> Сласть:
-                            </span>
-                            <input type="number" id="catalyst-slast" value="1000" min="0" step="10" placeholder="Введите количество сласти">
-                            <div class="input-hint">Цена за 1 ед: <span id="price-slast">7,800</span> ₽</div>
-                        </label>
-                        
-                        <label>
-                            <span class="label-icon" style="color: #ff4d8d;">
-                                <i class="fas fa-star"></i> Пыль:
-                            </span>
-                            <input type="number" id="catalyst-dust" value="10000" min="0" step="100" placeholder="Автоматически">
-                            <div class="input-hint">1 сласть = 10 пыли</div>
-                        </label>
-                        
-                        <div class="price-controls">
-                            <label>
-                                <span>Цена катализатора:</span>
-                                <input type="number" id="price-catalyst" value="4135" min="0">
-                            </label>
-                            <label class="checkbox">
-                                <input type="checkbox" id="use-tax" checked>
-                                <span>Учитывать налог 5%</span>
-                            </label>
+            <!-- РЕЗУЛЬТАТЫ (сверху как просили) -->
+            <div class="results-section">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Результаты</h2>
+                <div class="results-grid">
+                    <!-- Выход катализаторов -->
+                    <div class="result-card">
+                        <div class="result-icon">
+                            <i class="fas fa-flask"></i>
                         </div>
+                        <div class="result-title">ВЫХОД</div>
+                        <div class="result-value" id="result-output">0</div>
+                        <div class="result-subtitle">катализаторов</div>
                     </div>
                     
-                    <div class="results-grid">
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <div class="result-title">ВЫХОД</div>
-                            <div class="result-value" id="result-output">0</div>
-                            <div class="result-subtitle">катализаторов</div>
+                    <!-- Затраты -->
+                    <div class="result-card">
+                        <div class="result-icon" style="color: #ff4757;">
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
-                        
-                        <div class="result-card">
-                            <div class="result-icon" style="color: #ff4757;">
-                                <i class="fas fa-money-bill-wave"></i>
-                            </div>
-                            <div class="result-title">ЗАТРАТЫ</div>
-                            <div class="result-value" id="result-cost">0 ₽</div>
-                            <div class="result-subtitle">себестоимость</div>
-                        </div>
-                        
-                        <div class="result-card">
-                            <div class="result-icon" style="color: #00ff9d;">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="result-title">ВЫРУЧКА</div>
-                            <div class="result-value" id="result-revenue">0 ₽</div>
-                            <div class="result-subtitle">после продажи</div>
-                        </div>
-                        
-                        <div class="result-card highlight">
-                            <div class="result-icon">
-                                <i class="fas fa-trophy"></i>
-                            </div>
-                            <div class="result-title">ПРИБЫЛЬ</div>
-                            <div class="result-value" id="result-profit">0 ₽</div>
-                            <div class="result-subtitle">чистая прибыль</div>
-                        </div>
+                        <div class="result-title">ЗАТРАТЫ</div>
+                        <div class="result-value" id="result-cost">0 ₽</div>
+                        <div class="result-subtitle">себестоимость</div>
                     </div>
                     
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        <div>
-                            <strong>Формула расчета:</strong> 10 сласти + 100 пыли = 20 катализаторов<br>
-                            Прибыль = (Кол-во катализаторов × Цена продажи) - (Кол-во сласти × 7800 ₽)
+                    <!-- Выручка -->
+                    <div class="result-card">
+                        <div class="result-icon" style="color: #00ff9d;">
+                            <i class="fas fa-chart-line"></i>
                         </div>
+                        <div class="result-title">ВЫРУЧКА</div>
+                        <div class="result-value" id="result-revenue">0 ₽</div>
+                        <div class="result-subtitle">после продажи</div>
                     </div>
+                    
+                    <!-- Прибыль (главный результат) -->
+                    <div class="result-card highlight">
+                        <div class="result-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="result-title">ПРИБЫЛЬ</div>
+                        <div class="result-value" id="result-profit">0 ₽</div>
+                        <div class="result-subtitle">чистая прибыль</div>
+                    </div>
+                </div>
+                
+                <!-- Цена катализатора (справа от результатов) -->
+                <div class="catalyst-price-input">
+                    <h3><i class="fas fa-tag"></i> Цена продажи</h3>
+                    <div class="price-input-wrapper">
+                        <input type="number" id="price-catalyst" value="4135" min="0" step="10">
+                        <span class="currency">₽</span>
+                    </div>
+                    <div class="input-hint">Цена за 1 катализатор на рынке</div>
                 </div>
             </div>
             
-            <!-- Газовые баллоны -->
-            <div class="tab-content" id="gastank-section">
+            <!-- ВВОД ДАННЫХ (ниже результатов как просили) -->
+            <div class="input-section">
                 <div class="card">
-                    <h2><i class="fas fa-gas-pump"></i> Газовые баллоны</h2>
-                    <p class="subtitle">Раздел в разработке. Скоро здесь будет калькулятор газовых баллонов!</p>
-                    <div class="coming-soon">
-                        <i class="fas fa-tools fa-3x"></i>
-                        <h3>Скоро будет доступно</h3>
-                        <p>Мы работаем над добавлением этого функционала</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Другое -->
-            <div class="tab-content" id="other-section">
-                <div class="card">
-                    <h2><i class="fas fa-box"></i> Другое</h2>
-                    <p class="subtitle">Раздел в разработке. Здесь будут другие калькуляторы крафта.</p>
-                    <div class="coming-soon">
-                        <i class="fas fa-cogs fa-3x"></i>
-                        <h3>Дополнительные калькуляторы</h3>
-                        <p>Планируем добавить расчеты для других видов крафта</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Настройки -->
-            <div class="tab-content" id="settings-section">
-                <div class="card">
-                    <h2><i class="fas fa-cog"></i> Настройки</h2>
+                    <h2 class="section-title"><i class="fas fa-edit"></i> Ввод данных</h2>
                     
-                    <div class="settings-group">
-                        <h3><i class="fas fa-coins"></i> Цены на рынке</h3>
-                        
-                        <div class="price-inputs">
-                            <label>
-                                <span>Сласть:</span>
-                                <input type="number" id="setting-price-slast" value="7800" min="0">
-                                <span class="currency">₽</span>
-                            </label>
+                    <div class="input-grid">
+                        <!-- Левая колонка: количество сырья -->
+                        <div class="resource-inputs">
+                            <h3><i class="fas fa-box-open"></i> Количество сырья</h3>
                             
-                            <label>
-                                <span>Катализатор:</span>
-                                <input type="number" id="setting-price-catalyst" value="4135" min="0">
-                                <span class="currency">₽</span>
-                            </label>
+                            <div class="resource-input-group">
+                                <label>
+                                    <span class="resource-label">
+                                        <i class="fas fa-gem" style="color: #00f3ff;"></i>
+                                        Сласть:
+                                    </span>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="catalyst-slast" value="1000" min="0" step="10" placeholder="Количество сласти">
+                                        <div class="price-display">
+                                            <span>Цена: </span>
+                                            <input type="number" id="price-slast" value="7800" min="0" class="price-input">
+                                            <span class="currency">₽</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-hint">1 сласть = 10 пыли (автоматически)</div>
+                                </label>
+                            </div>
                             
-                            <label>
-                                <span>Пыль:</span>
-                                <input type="number" id="setting-price-dust" value="275" min="0">
-                                <span class="currency">₽</span>
-                            </label>
+                            <div class="resource-input-group">
+                                <label>
+                                    <span class="resource-label">
+                                        <i class="fas fa-star" style="color: #ff4d8d;"></i>
+                                        Пыль:
+                                    </span>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="catalyst-dust" value="10000" min="0" step="100" placeholder="Количество пыли">
+                                        <div class="price-display">
+                                            <span>Цена: </span>
+                                            <input type="number" id="price-dust" value="275" min="0" class="price-input">
+                                            <span class="currency">₽</span>
+                                        </div>
+                                    </div>
+                                    <div class="input-hint">Нужно 100 пыли на 1 крафт</div>
+                                </label>
+                            </div>
                         </div>
                         
-                        <div class="settings-group">
-                            <h3><i class="fas fa-paint-brush"></i> Внешний вид</h3>
-                            <label class="checkbox">
-                                <input type="checkbox" id="setting-dark-mode" checked>
-                                <span>Темная тема</span>
-                            </label>
-                            <label class="checkbox">
-                                <input type="checkbox" id="setting-animations" checked>
-                                <span>Анимации</span>
-                            </label>
+                        <!-- Правая колонка: настройки -->
+                        <div class="settings-column">
+                            <h3><i class="fas fa-cog"></i> Настройки</h3>
+                            
+                            <div class="settings-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="use-tax" checked>
+                                    <span>Учитывать налог 5% при продаже</span>
+                                </label>
+                                
+                                <label class="checkbox">
+                                    <input type="checkbox" id="auto-update" checked>
+                                    <span>Автоматический пересчет</span>
+                                </label>
+                            </div>
+                            
+                            <div class="formula-info">
+                                <h4><i class="fas fa-calculator"></i> Формула крафта:</h4>
+                                <p>10 сласти + 100 пыли = 20 катализаторов</p>
+                                <div class="formula-breakdown">
+                                    <div>• 1 крафт: <strong>10</strong> сласти</div>
+                                    <div>• 1 крафт: <strong>100</strong> пыли</div>
+                                    <div>• Выход: <strong>20</strong> катализаторов</div>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div class="settings-group">
-                            <h3><i class="fas fa-database"></i> Данные</h3>
-                            <button class="btn-secondary" id="btn-save">
-                                <i class="fas fa-save"></i> Сохранить настройки
-                            </button>
-                            <button class="btn-secondary" id="btn-reset">
-                                <i class="fas fa-undo"></i> Сбросить к стандартным
-                            </button>
+                    </div>
+                    
+                    <!-- Детали расчета -->
+                    <div class="calculation-details" id="resource-details">
+                        <h3><i class="fas fa-info-circle"></i> Детали расчета</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span>Возможных крафтов:</span>
+                                <strong id="detail-crafts">0</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span>Использовано сласти:</span>
+                                <strong id="detail-slast-used">0</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span>Использовано пыли:</span>
+                                <strong id="detail-dust-used">0</strong>
+                            </div>
+                            <div class="detail-item">
+                                <span>Эффективность:</span>
+                                <strong id="detail-efficiency">100%</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+        
+        <!-- Футер -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="version">v1.0.0</div>
+                <div class="github-link">
+                    <a href="https://github.com/Ruslan1420/StalcraftCraftCalc" target="_blank">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <!-- Футер -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <i class="fas fa-calculator"></i>
-                <span>Stalcraft Craft Calc</span>
-            </div>
-            <div class="footer-info">
-                <div>Версия 1.0.0</div>
-                <div>Неофициальный калькулятор для Stalcraft</div>
-            </div>
-            <div class="footer-links">
-                <a href="https://github.com/Ruslan1420/StalcrafCraftCalc" target="_blank">
-                    <i class="fab fa-github"></i> GitHub
-                </a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Подключаем JavaScript -->
+    <!-- JavaScript -->
     <script src="js/main.js"></script>
 </body>
 </html>
