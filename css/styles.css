@@ -8,6 +8,7 @@
     --danger: #ff4757;
     --warning: #ffaa00;
     --purple: #9d4edd;
+    --gray: #a0a0a0;
     
     --font-heading: 'Orbitron', sans-serif;
     --font-body: 'Exo 2', sans-serif;
@@ -19,20 +20,7 @@
     --radius-sm: 6px;
 }
 
-/* Добавь в начало css/styles.css после :root */
-input {
-    font-family: var(--font-body);
-}
-
-/* Или конкретно для инпутов ресурсов */
-.resource-item input {
-    font-family: var(--font-body) !important;
-}
-
-.price-input input {
-    font-family: var(--font-body) !important;
-}
-
+/* Базовые стили для текста и инпутов */
 * {
     margin: 0;
     padding: 0;
@@ -45,6 +33,10 @@ body {
     color: var(--light);
     min-height: 100vh;
     padding: 20px;
+}
+
+input {
+    font-family: var(--font-body);
 }
 
 .app-container {
@@ -114,7 +106,7 @@ body {
     border-radius: var(--radius-sm);
     color: var(--light);
     font-size: 18px;
-    font-family: var(--font-heading);
+    font-family: var(--font-body);
 }
 
 .price-input span {
@@ -272,6 +264,7 @@ body {
     color: var(--light);
     font-size: 16px;
     text-align: center;
+    font-family: var(--font-body);
 }
 
 .resource-output {
@@ -363,6 +356,10 @@ body {
     gap: 8px;
 }
 
+.price-item.disabled {
+    opacity: 0.85;
+}
+
 .price-header {
     display: flex;
     align-items: center;
@@ -392,13 +389,46 @@ body {
     border-radius: var(--radius-sm);
     color: var(--light);
     font-size: 16px;
+    font-family: var(--font-body);
 }
 
 .price-input.disabled input {
     background: rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.1);
-    color: #aaa;
+    color: var(--gray);
     cursor: not-allowed;
+    font-style: italic;
+}
+
+.price-input.disabled input:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.price-input.disabled {
+    position: relative;
+}
+
+.price-input.disabled::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    background: rgba(150, 150, 150, 0.05);
+    border-radius: var(--radius-sm);
+    z-index: -1;
+    animation: subtleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes subtleGlow {
+    from {
+        box-shadow: 0 0 3px rgba(150, 150, 150, 0.2);
+    }
+    to {
+        box-shadow: 0 0 8px rgba(200, 200, 200, 0.3);
+    }
 }
 
 .price-input span {
@@ -417,6 +447,36 @@ body {
     border-radius: var(--radius-sm);
     margin-bottom: 20px;
     border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.energy-price .price-header {
+    margin-bottom: 10px;
+}
+
+.energy-price .price-input {
+    margin-bottom: 8px;
+}
+
+.energy-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--primary);
+}
+
+.energy-hint i {
+    font-size: 14px;
+    color: var(--primary);
+}
+
+.energy-hint span {
+    color: var(--light);
+    opacity: 0.9;
 }
 
 /* Итоговая стоимость */
@@ -460,6 +520,29 @@ body {
     font-size: 13px;
 }
 
+/* Убираем стрелочки у инпутов */
+.no-spinner {
+    -moz-appearance: textfield;
+}
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Для поля энергии с десятичным вводом */
+.decimal-input {
+    font-family: var(--font-body);
+    width: 100%;
+    padding: 10px 35px 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--light);
+    font-size: 16px;
+}
+
 /* Адаптивность */
 @media (max-width: 900px) {
     .top-section {
@@ -492,53 +575,4 @@ body {
         width: 95%;
         margin: 10px;
     }
-}
-
-/* Добавь эти стили в конец файла: */
-
-/* Убираем стрелочки у инпутов */
-.no-spinner {
-    -moz-appearance: textfield;
-}
-
-.no-spinner::-webkit-outer-spin-button,
-.no-spinner::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-/* Для поля энергии с десятичным вводом */
-.decimal-input {
-    font-family: var(--font-body);
-    width: 100%;
-    padding: 10px 35px 10px 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(0, 243, 255, 0.2);
-    border-radius: var(--radius-sm);
-    color: var(--light);
-    font-size: 16px;
-}
-
-/* Подсказка для энергии */
-.energy-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 6px 10px;
-    background: rgba(0, 243, 255, 0.1);
-    border: 1px solid rgba(0, 243, 255, 0.2);
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    color: var(--primary);
-}
-
-.energy-hint i {
-    font-size: 14px;
-    color: var(--primary);
-}
-
-.energy-hint span {
-    color: var(--light);
-    opacity: 0.9;
 }
