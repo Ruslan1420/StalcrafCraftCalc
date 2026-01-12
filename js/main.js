@@ -1,11 +1,8 @@
-// js/main.js - с сахаром как вводимым ресурсом
+// js/main.js - Упрощенная версия без эффектов
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Stalcraft Calculator loaded');
     
-    // Инициализация
     initCalculator();
-    
-    // Первый расчет
     calculate();
 });
 
@@ -46,204 +43,63 @@ function initCalculator() {
     const resultRevenue = document.getElementById('result-revenue');
     const resultProfit = document.getElementById('result-profit');
     
-    // ========== ФУНКЦИЯ ОГРАНИЧЕНИЯ ВВОДА (8 СИМВОЛОВ) ==========
+    // ========== ПРОСТОЙ ОГРАНИЧИТЕЛЬ 8 СИМВОЛОВ ==========
     
-    function setupInputLimits() {
-        // Максимальная длина
-        const MAX_LENGTH = 8;
-        
-        // Все числовые инпуты
-        const allNumberInputs = [
+    function setupSimpleLimits() {
+        const inputs = [
             slastInput, dustInput, plasmaInput, sugarInput,
             priceSlastInput, priceDustInput, pricePlasmaInput,
             priceCatalystInput
         ];
         
-        allNumberInputs.forEach(input => {
-            if (input) {
-                // Ограничение максимальной длины в HTML
-                input.setAttribute('maxlength', MAX_LENGTH);
-                
-                // Обработчик ввода
-                input.addEventListener('input', function(e) {
-                    // Текущее значение
-                    let value = this.value;
-                    
-                    // Если пустое значение - оставляем как есть
-                    if (value === '') return;
-                    
-                    // Удаляем все символы кроме цифр
-                    let newValue = value.replace(/[^\d]/g, '');
-                    
-                    // Ограничиваем длину
-                    if (newValue.length > MAX_LENGTH) {
-                        newValue = newValue.substring(0, MAX_LENGTH);
-                    }
-                    
-                    // Обновляем значение если оно изменилось
-                    if (newValue !== value) {
-                        this.value = newValue;
-                    }
-                    
-                    // Показываем предупреждение если превышен лимит
-                    if (newValue.length >= MAX_LENGTH) {
-                        showLengthWarning(this, MAX_LENGTH);
-                    }
-                });
-                
-                // Обработчик вставки
-                input.addEventListener('paste', function(e) {
-                    e.preventDefault();
-                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                    
-                    // Фильтруем вставленный текст (только цифры)
-                    let filtered = pastedText.replace(/[^\d]/g, '');
-                    
-                    // Ограничиваем длину
-                    if (filtered.length > MAX_LENGTH) {
-                        filtered = filtered.substring(0, MAX_LENGTH);
-                        showLengthWarning(this, MAX_LENGTH);
-                    }
-                    
-                    // Вставляем отфильтрованный текст
-                    const start = this.selectionStart;
-                    const end = this.selectionEnd;
-                    const currentValue = this.value;
-                    
-                    // Вычисляем новое значение
-                    const before = currentValue.substring(0, start);
-                    const after = currentValue.substring(end);
-                    const newValue = before + filtered + after;
-                    
-                    // Проверяем общую длину
-                    if (newValue.length > MAX_LENGTH) {
-                        // Обрезаем до MAX_LENGTH
-                        this.value = newValue.substring(0, MAX_LENGTH);
-                        showLengthWarning(this, MAX_LENGTH);
-                    } else {
-                        this.value = newValue;
-                    }
-                    
-                    // Перемещаем курсор
-                    this.selectionStart = this.selectionEnd = start + filtered.length;
-                    
-                    // Запускаем расчет
-                    calculate();
-                    saveAllData();
-                });
-                
-                // Показываем предупреждение при фокусе
-                input.addEventListener('focus', function() {
-                    if (this.value.length >= MAX_LENGTH) {
-                        showLengthWarning(this, MAX_LENGTH);
-                    }
-                });
-            }
-        });
-        
-        // Особый обработчик для поля энергии (десятичные числа)
-        if (priceEnergyInput) {
-            priceEnergyInput.setAttribute('maxlength', MAX_LENGTH + 3); // +3 для точки и знаков после
+        inputs.forEach(input => {
+            if (!input) return;
             
-            priceEnergyInput.addEventListener('input', function(e) {
-                // Заменяем запятую на точку
-                let value = this.value.replace(',', '.');
+            // Простое ограничение ввода
+            input.addEventListener('input', function() {
+                // Оставляем только цифры
+                this.value = this.value.replace(/[^\d]/g, '');
                 
-                // Удаляем все символы кроме цифр и точки
-                let newValue = '';
-                let hasDot = false;
-                
-                for (let i = 0; i < value.length; i++) {
-                    const char = value[i];
-                    
-                    // Точка (только одна)
-                    if (char === '.' && !hasDot) {
-                        newValue += char;
-                        hasDot = true;
-                    }
-                    // Цифры
-                    else if (char >= '0' && char <= '9') {
-                        newValue += char;
-                    }
-                }
-                
-                // Ограничиваем общую длину
-                if (newValue.length > MAX_LENGTH + 3) { // цифры + точка + 2 знака после
-                    newValue = newValue.substring(0, MAX_LENGTH + 3);
-                }
-                
-                // Ограничиваем знаки после запятой
-                if (hasDot) {
-                    const parts = newValue.split('.');
-                    if (parts[1] && parts[1].length > 2) {
-                        parts[1] = parts[1].substring(0, 2);
-                        newValue = parts[0] + '.' + parts[1];
-                    }
-                }
-                
-                // Обновляем значение если оно изменилось
-                if (newValue !== this.value) {
-                    this.value = newValue;
-                }
-                
-                // Проверяем длину целой части
-                const intPart = newValue.split('.')[0];
-                if (intPart && intPart.length >= MAX_LENGTH) {
-                    showLengthWarning(this, MAX_LENGTH);
+                // Обрезаем до 8 символов
+                if (this.value.length > 8) {
+                    this.value = this.value.substring(0, 8);
                 }
             });
-        }
+        });
         
-        console.log(`Ограничения ввода установлены (${MAX_LENGTH} символов)`);
-    }
-    
-    // Функция показа предупреждения
-    function showLengthWarning(inputElement, maxLength) {
-        // Создаем или находим тултип
-        let tooltip = inputElement.parentNode.querySelector('.length-warning');
-        
-        if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.className = 'length-warning';
-            tooltip.innerHTML = `Максимум ${maxLength} цифр`;
-            tooltip.style.cssText = `
-                position: absolute;
-                background: #ff4757;
-                color: white;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                z-index: 1000;
-                top: -30px;
-                left: 0;
-                white-space: nowrap;
-                animation: fadeIn 0.3s;
-            `;
-            inputElement.parentNode.style.position = 'relative';
-            inputElement.parentNode.appendChild(tooltip);
-            
-            // Убираем через 2 секунды
-            setTimeout(() => {
-                if (tooltip.parentNode) {
-                    tooltip.parentNode.removeChild(tooltip);
+        // Особый обработчик для поля энергии
+        if (priceEnergyInput) {
+            priceEnergyInput.addEventListener('input', function() {
+                let value = this.value.replace(',', '.');
+                value = value.replace(/[^\d.]/g, '');
+                
+                // Удаляем лишние точки
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
                 }
-            }, 2000);
+                
+                // Ограничиваем 2 знаками после запятой
+                if (parts.length === 2) {
+                    parts[1] = parts[1].slice(0, 2);
+                    value = parts[0] + '.' + parts[1];
+                }
+                
+                this.value = value;
+            });
         }
     }
     
-    // ========== СОХРАНЕНИЕ В LOCALSTORAGE ==========
+    // ========== СОХРАНЕНИЕ ДАННЫХ ==========
     
-    // Сохранить все данные
     function saveAllData() {
         try {
             const data = {
-                // Ресурсы
                 slast: slastInput.value,
                 dust: dustInput.value,
                 plasma: plasmaInput.value,
                 sugar: sugarInput.value,
                 
-                // Цены
                 priceSlast: priceSlastInput.value,
                 priceDust: priceDustInput.value,
                 pricePlasma: pricePlasmaInput.value,
@@ -251,10 +107,8 @@ function initCalculator() {
                 priceCatalyst: priceCatalystInput.value,
                 priceSugar: priceSugarInput.value,
                 
-                // Настройки
                 useTax: useTaxCheckbox.checked,
                 
-                // Результаты
                 results: {
                     output: resultOutput.textContent,
                     cost: resultCost.textContent,
@@ -266,21 +120,16 @@ function initCalculator() {
             };
             
             localStorage.setItem('stalcraft_calculator', JSON.stringify(data));
-            console.log('Данные сохранены');
-            
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
     }
     
-    // Загрузить сохраненные данные
     function loadSavedData() {
         try {
             const saved = localStorage.getItem('stalcraft_calculator');
             if (saved) {
                 const data = JSON.parse(saved);
-                
-                console.log('Загружаем сохраненные данные:', data);
                 
                 // Загружаем ресурсы
                 if (data.slast !== undefined) slastInput.value = data.slast;
@@ -299,22 +148,18 @@ function initCalculator() {
                 // Загружаем настройки
                 if (data.useTax !== undefined) useTaxCheckbox.checked = data.useTax;
                 
-                // Загружаем результаты если они есть
+                // Загружаем результаты
                 if (data.results) {
                     resultOutput.textContent = data.results.output || '0';
                     resultCost.textContent = data.results.cost || '0 ₽';
                     resultRevenue.textContent = data.results.revenue || '0 ₽';
                     resultProfit.textContent = data.results.profit || '0 ₽';
                     
-                    // Восстанавливаем цвет прибыли
                     const profitText = data.results.profit || '0 ₽';
                     const profitValue = parseFloat(profitText.replace(/[^\d.-]/g, ''));
                     resultProfit.style.color = profitValue >= 0 ? '#00ff9d' : '#ff4757';
                 }
                 
-                console.log('Данные загружены успешно');
-                
-                // Даем время DOM обновиться и пересчитываем
                 setTimeout(() => {
                     calculate();
                 }, 100);
@@ -324,53 +169,14 @@ function initCalculator() {
         }
     }
     
-    // ========== ОБРАБОТКА ДЕСЯТИЧНЫХ ЗНАЧЕНИЙ ==========
+    // ========== РАСЧЕТ РЕСУРСОВ ==========
     
-    // Обработчик для поля энергии
-    function setupEnergyInput() {
-        if (!priceEnergyInput) return;
-        
-        priceEnergyInput.addEventListener('input', function() {
-            // Заменяем запятую на точку
-            let value = this.value.replace(',', '.');
-            
-            // Удаляем все символы кроме цифр и точки
-            value = value.replace(/[^\d.]/g, '');
-            
-            // Удаляем лишние точки
-            const parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
-            
-            // Ограничиваем 2 знаками после запятой
-            if (parts.length === 2) {
-                parts[1] = parts[1].slice(0, 2);
-                value = parts[0] + '.' + parts[1];
-            }
-            
-            this.value = value;
-            
-            // Обновляем расчет
-            calculate();
-            saveAllData();
-        });
-    }
-    
-    // ========== АВТОМАТИЧЕСКИЙ РАСЧЕТ РЕСУРСОВ ИЗ САХАРА ==========
-    
-    // Рассчитать ресурсы из сахара
     function calculateResourcesFromSugar(sugarAmount) {
         const sugar = parseFloat(sugarAmount) || 0;
-        
-        // Сколько можно сделать катализаторов из этого сахара?
         const catalystCrafts = Math.floor(sugar / CRAFT.CATALYST.SUGAR);
-        
-        // Для этого количества катализаторов нужно:
         const neededSugar = catalystCrafts * CRAFT.CATALYST.SUGAR;
         const neededDustForCatalyst = catalystCrafts * CRAFT.CATALYST.DUST;
         
-        // Для производства этого сахара нужно:
         const sugarCrafts = Math.ceil(neededSugar / CRAFT.SUGAR.OUTPUT);
         const neededSlatsForSugar = sugarCrafts * CRAFT.SUGAR.SLATS;
         const neededPlasmaForSugar = sugarCrafts * CRAFT.SUGAR.PLASMA;
@@ -381,14 +187,11 @@ function initCalculator() {
             slast: neededSlatsForSugar,
             plasma: neededPlasmaForSugar,
             dust: neededDustForSugar + neededDustForCatalyst,
-            totalDust: neededDustForSugar + neededDustForCatalyst,
             catalystCrafts: catalystCrafts
         };
     }
     
-    // Рассчитать сахар из ресурсов
     function calculateSugarFromResources(slast, dust, plasma) {
-        // Сколько можно сделать сахара из ресурсов?
         const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
         const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
         const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
@@ -406,13 +209,11 @@ function initCalculator() {
     
     // ========== ОБРАБОТЧИКИ ВВОДА ==========
     
-    // При изменении сахара
     sugarInput.addEventListener('input', function() {
         const sugarAmount = parseFloat(this.value) || 0;
         
         if (sugarAmount > 0) {
             const resources = calculateResourcesFromSugar(sugarAmount);
-            
             slastInput.value = resources.slast;
             plasmaInput.value = resources.plasma;
             dustInput.value = resources.dust;
@@ -422,15 +223,11 @@ function initCalculator() {
         saveAllData();
     });
     
-    // При изменении сластены
     slastInput.addEventListener('input', function() {
         const slast = parseFloat(this.value) || 0;
-        
-        // Автоматическая связь
         plasmaInput.value = Math.floor(slast / 10);
         dustInput.value = Math.floor(slast * 30);
         
-        // Рассчитываем сколько сахара получится
         const dust = parseFloat(dustInput.value) || 0;
         const plasma = parseFloat(plasmaInput.value) || 0;
         
@@ -441,15 +238,11 @@ function initCalculator() {
         saveAllData();
     });
     
-    // При изменении пыли
     dustInput.addEventListener('input', function() {
         const dust = parseFloat(this.value) || 0;
-        
-        // Автоматическая связь
         slastInput.value = Math.floor(dust / 30);
         plasmaInput.value = Math.floor(dust / 300);
         
-        // Рассчитываем сколько сахара получится
         const slast = parseFloat(slastInput.value) || 0;
         const plasma = parseFloat(plasmaInput.value) || 0;
         
@@ -460,15 +253,11 @@ function initCalculator() {
         saveAllData();
     });
     
-    // При изменении плазмы
     plasmaInput.addEventListener('input', function() {
         const plasma = parseFloat(this.value) || 0;
-        
-        // Автоматическая связь
         slastInput.value = plasma * 10;
         dustInput.value = plasma * 300;
         
-        // Рассчитываем сколько сахара получится
         const slast = parseFloat(slastInput.value) || 0;
         const dust = parseFloat(dustInput.value) || 0;
         
@@ -500,22 +289,13 @@ function initCalculator() {
         saveAllData();
     });
     
-    // Обработчик налога
     useTaxCheckbox.addEventListener('change', function() {
         calculate();
         saveAllData();
     });
     
-    // Настраиваем поле энергии
-    setupEnergyInput();
+    // ========== ОСНОВНОЙ РАСЧЕТ ==========
     
-    // Настраиваем ограничения ввода
-    setupInputLimits();
-    
-    // Загружаем сохраненные данные при запуске
-    loadSavedData();
-    
-    // Расчетная функция
     function calculate() {
         const slast = parseFloat(slastInput.value) || 0;
         const dust = parseFloat(dustInput.value) || 0;
@@ -529,33 +309,24 @@ function initCalculator() {
         const priceCatalyst = parseFloat(priceCatalystInput.value) || 4135;
         const useTax = useTaxCheckbox.checked;
         
-        // РАСЧЕТ СТОИМОСТИ САХАРА
-        // Рассчитываем стоимость одного сахара на основе его компонентов
-        // 10 сластены + 1 плазма + 100 пыли = 30 сахара
+        // Расчет стоимости сахара
         const costOneSugarCraft = 
             (CRAFT.SUGAR.SLATS * priceSlast + 
              CRAFT.SUGAR.PLASMA * pricePlasma + 
              CRAFT.SUGAR.DUST * priceDust + 
              CRAFT.ENERGY_PER_CRAFT * priceEnergy) / CRAFT.SUGAR.OUTPUT;
         
-        // Отображаем стоимость сахара (округляем до целых)
-        const sugarPrice = Math.round(costOneSugarCraft);
-        priceSugarInput.value = sugarPrice;
+        priceSugarInput.value = Math.round(costOneSugarCraft);
         
-        // Рассчитываем что можно сделать
+        // Расчет катализаторов
         let catalystsProduced = 0;
         let totalCost = 0;
         
-        // Если указан сахар - используем логику "от сахара"
         if (sugar > 0) {
-            // Сколько можно сделать катализаторов из этого сахара?
             const catalystCrafts = Math.floor(sugar / CRAFT.CATALYST.SUGAR);
-            
-            // Нужные ресурсы для этого количества катализаторов
             const neededSugar = catalystCrafts * CRAFT.CATALYST.SUGAR;
             const neededDustForCatalyst = catalystCrafts * CRAFT.CATALYST.DUST;
             
-            // Для производства этого сахара нужно:
             const sugarCrafts = Math.ceil(neededSugar / CRAFT.SUGAR.OUTPUT);
             const neededSlatsForSugar = sugarCrafts * CRAFT.SUGAR.SLATS;
             const neededPlasmaForSugar = sugarCrafts * CRAFT.SUGAR.PLASMA;
@@ -563,7 +334,6 @@ function initCalculator() {
             
             catalystsProduced = catalystCrafts * CRAFT.CATALYST.OUTPUT;
             
-            // Затраты
             const costSlats = neededSlatsForSugar * priceSlast;
             const costPlasma = neededPlasmaForSugar * pricePlasma;
             const costDust = (neededDustForSugar + neededDustForCatalyst) * priceDust;
@@ -572,14 +342,12 @@ function initCalculator() {
             
             totalCost = costSlats + costPlasma + costDust + costEnergy;
         } else {
-            // Старая логика - от ресурсов
             const sugarFromSlats = Math.floor(slast / CRAFT.SUGAR.SLATS);
             const sugarFromPlasma = Math.floor(plasma / CRAFT.SUGAR.PLASMA);
             const sugarFromDust = Math.floor(dust / CRAFT.SUGAR.DUST);
             
             const maxSugarCrafts = Math.min(sugarFromSlats, sugarFromPlasma, sugarFromDust);
             const sugarProduced = maxSugarCrafts * CRAFT.SUGAR.OUTPUT;
-            
             const remainingDust = dust - (maxSugarCrafts * CRAFT.SUGAR.DUST);
             
             const catalystFromSugar = Math.floor(sugarProduced / CRAFT.CATALYST.SUGAR);
@@ -606,19 +374,16 @@ function initCalculator() {
             totalCost = costSlats + costPlasma + costDust + costEnergy;
         }
         
-        // Выручка
+        // Выручка и прибыль
         let revenue = catalystsProduced * priceCatalyst;
         if (useTax) {
             revenue = revenue * 0.95;
         }
         
-        // Прибыль
         const profit = revenue - totalCost;
         
         // Обновление интерфейса
         updateResults(catalystsProduced, totalCost, revenue, profit);
-        
-        // Сохраняем результаты
         saveAllData();
     }
     
@@ -633,18 +398,20 @@ function initCalculator() {
     
     function formatMoney(amount) {
         if (isNaN(amount)) {
-            return '0\xa0₽'; // Неразрывный пробел перед рублем
+            return '0\xa0₽'; // Неразрывный пробел
         }
         
-        // Форматируем большие числа
-        if (Math.abs(amount) >= 1000000) {
-            return (amount / 1000000).toFixed(2) + '\xa0млн\xa0₽';
-        }
+        // БЕЗ "млн" - всегда показываем полное число
+        // Форматируем с пробелами тысяч и фиксируем знак рубля
         if (Math.abs(amount) >= 1000) {
             return Math.round(amount).toLocaleString('ru-RU') + '\xa0₽';
         }
         
-        // Для маленьких чисел
         return amount.toFixed(1) + '\xa0₽';
     }
+    
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    
+    setupSimpleLimits();
+    loadSavedData();
 }
