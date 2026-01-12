@@ -19,6 +19,20 @@
     --radius-sm: 6px;
 }
 
+/* Добавь в начало css/styles.css после :root */
+input {
+    font-family: var(--font-body);
+}
+
+/* Или конкретно для инпутов ресурсов */
+.resource-item input {
+    font-family: var(--font-body) !important;
+}
+
+.price-input input {
+    font-family: var(--font-body) !important;
+}
+
 * {
     margin: 0;
     padding: 0;
