@@ -38,7 +38,6 @@ body {
     margin: 0 auto;
 }
 
-/* Шапка */
 .header {
     margin-bottom: 25px;
 }
@@ -62,7 +61,6 @@ body {
     font-weight: 600;
 }
 
-/* Верхний блок */
 .top-section {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -128,7 +126,6 @@ body {
     accent-color: var(--primary);
 }
 
-/* Результаты */
 .results-box {
     background: rgba(16, 22, 36, 0.95);
     border-radius: var(--radius);
@@ -185,7 +182,6 @@ body {
     color: #aaa;
 }
 
-/* Нижний блок */
 .bottom-section {
     display: grid;
     grid-template-columns: 1fr 350px;
@@ -211,7 +207,6 @@ body {
     gap: 10px;
 }
 
-/* Ресурсы */
 .resources-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -273,7 +268,6 @@ body {
     margin-top: 5px;
 }
 
-/* Процесс крафта */
 .craft-process {
     background: rgba(0, 243, 255, 0.05);
     border-radius: var(--radius-sm);
@@ -335,7 +329,6 @@ body {
     border-radius: 4px;
 }
 
-/* Цены */
 .pricing-grid {
     display: flex;
     flex-direction: column;
@@ -396,7 +389,6 @@ body {
     font-size: 14px;
 }
 
-/* Энергия */
 .energy-price {
     background: rgba(0, 0, 0, 0.2);
     padding: 15px;
@@ -405,7 +397,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Итоговая стоимость */
 .cost-summary {
     background: rgba(0, 0, 0, 0.3);
     padding: 15px;
@@ -436,7 +427,6 @@ body {
     font-weight: 600;
 }
 
-/* Футер */
 .footer {
     margin-top: 25px;
     padding-top: 15px;
@@ -446,7 +436,6 @@ body {
     font-size: 13px;
 }
 
-/* Модальное окно */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -455,7 +444,7 @@ body {
     bottom: 0;
     background: rgba(10, 14, 23, 0.95);
     backdrop-filter: blur(10px);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
@@ -556,10 +545,6 @@ body {
     box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
 }
 
-.btn-ok:active {
-    transform: translateY(0);
-}
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -576,18 +561,6 @@ body {
     }
 }
 
-/* Заблокированные инпуты когда модалка открыта */
-body.modal-open {
-    overflow: hidden;
-}
-
-body.modal-open .app-container {
-    filter: blur(5px);
-    pointer-events: none;
-    user-select: none;
-}
-
-/* Адаптивность */
 @media (max-width: 900px) {
     .top-section {
         grid-template-columns: 1fr;
