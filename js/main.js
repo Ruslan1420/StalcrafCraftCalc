@@ -1,4 +1,4 @@
-// js/main.js
+// js/main.js - исправленная версия
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Stalcraft Calculator loaded');
     
@@ -59,7 +59,7 @@ function initCalculator() {
     let originalValue = null;
     let isProcessing = false;
     
-    // ========== ПРОСТОЕ СОХРАНЕНИЕ В LOCALSTORAGE ==========
+    // ========== СОХРАНЕНИЕ В LOCALSTORAGE ==========
     
     // Сохранить все данные
     function saveAllData() {
@@ -102,19 +102,19 @@ function initCalculator() {
                 console.log('Загружаем сохраненные данные:', data);
                 
                 // Загружаем ресурсы
-                slastInput.value = data.slast || 10;
-                dustInput.value = data.dust || 300;
-                plasmaInput.value = data.plasma || 1;
+                if (data.slast) slastInput.value = data.slast;
+                if (data.dust) dustInput.value = data.dust;
+                if (data.plasma) plasmaInput.value = data.plasma;
                 
                 // Загружаем цены
-                priceSlastInput.value = data.priceSlast || 7800;
-                priceDustInput.value = data.priceDust || 275;
-                pricePlasmaInput.value = data.pricePlasma || 1500;
-                priceEnergyInput.value = data.priceEnergy || 1.2;
-                priceCatalystInput.value = data.priceCatalyst || 4135;
+                if (data.priceSlast) priceSlastInput.value = data.priceSlast;
+                if (data.priceDust) priceDustInput.value = data.priceDust;
+                if (data.pricePlasma) pricePlasmaInput.value = data.pricePlasma;
+                if (data.priceEnergy) priceEnergyInput.value = data.priceEnergy;
+                if (data.priceCatalyst) priceCatalystInput.value = data.priceCatalyst;
                 
                 // Загружаем настройки
-                useTaxCheckbox.checked = data.useTax !== false;
+                if (data.useTax !== undefined) useTaxCheckbox.checked = data.useTax;
                 
                 console.log('Данные загружены успешно');
             }
@@ -167,17 +167,20 @@ function initCalculator() {
         }
     });
     
-    // Проверка на 10+ символов
-    function checkLength(value, input, resourceName) {
-        const strValue = String(value);
+    // ИСПРАВЛЕННАЯ ПРОВЕРКА НА 10+ СИМВОЛОВ
+    function checkLength(inputElement, resourceName) {
+        const strValue = inputElement.value;
         
-        if (strValue.length >= 10) {
-            showModal(`Осторожно! Вы ввели ${strValue.length} символов. Проверьте правильность ввода.`, input);
+        // Проверяем только если строка не пустая и больше 9 символов
+        if (strValue && strValue.length > 9) {
+            showModal(`Осторожно! Вы ввели ${strValue.length} символов в поле "${resourceName}". Проверьте правильность ввода.`, inputElement);
             return false;
         }
         
-        if (value > 1000000) {
-            showModal(`Слишком большое значение: ${value.toLocaleString('ru-RU')} ${resourceName}`, input);
+        // Проверяем числовое значение
+        const numValue = parseFloat(strValue) || 0;
+        if (numValue > 1000000) {
+            showModal(`Слишком большое значение: ${numValue.toLocaleString('ru-RU')} ${resourceName}`, inputElement);
             return false;
         }
         
@@ -190,22 +193,13 @@ function initCalculator() {
         
         isProcessing = true;
         
+        // Проверка длины ВХОДЯЩЕГО значения (то что пользователь ввел)
+        if (!checkLength(inputElement, resourceName)) {
+            isProcessing = false;
+            return;
+        }
+        
         const value = parseFloat(inputElement.value) || 0;
-        const strValue = inputElement.value;
-        
-        // Проверка на 10+ символов
-        if (strValue.length >= 10) {
-            showModal(`Внимание! Вы ввели ${strValue.length} символов. Проверьте правильность ввода.`, inputElement);
-            isProcessing = false;
-            return;
-        }
-        
-        // Проверка на большие числа
-        if (value > 1000000) {
-            showModal(`Слишком большое количество: ${value.toLocaleString('ru-RU')}`, inputElement);
-            isProcessing = false;
-            return;
-        }
         
         // Обновляем другие инпуты если нужно
         if (updateOtherInputs) {
@@ -241,25 +235,85 @@ function initCalculator() {
         });
     });
     
-    // Обработчики цен
+    // Обработчики цен - БЕЗ ПРОВЕРКИ ДЛИНЫ ДЛЯ ЦЕН
     priceSlastInput.addEventListener('input', function() {
-        handleInput(this, 'цены сластены');
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        const value = parseFloat(this.value) || 0;
+        if (value > 100000) {
+            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
+            isProcessing = false;
+            return;
+        }
+        
+        calculate();
+        saveAllData();
+        isProcessing = false;
     });
     
     priceDustInput.addEventListener('input', function() {
-        handleInput(this, 'цены пыли');
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        const value = parseFloat(this.value) || 0;
+        if (value > 100000) {
+            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
+            isProcessing = false;
+            return;
+        }
+        
+        calculate();
+        saveAllData();
+        isProcessing = false;
     });
     
     pricePlasmaInput.addEventListener('input', function() {
-        handleInput(this, 'цены плазмы');
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        const value = parseFloat(this.value) || 0;
+        if (value > 100000) {
+            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
+            isProcessing = false;
+            return;
+        }
+        
+        calculate();
+        saveAllData();
+        isProcessing = false;
     });
     
     priceEnergyInput.addEventListener('input', function() {
-        handleInput(this, 'цены энергии');
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        const value = parseFloat(this.value) || 0;
+        if (value > 100) {
+            showModal(`Энергия по ${value} ₽? Дороговато!`, this);
+            isProcessing = false;
+            return;
+        }
+        
+        calculate();
+        saveAllData();
+        isProcessing = false;
     });
     
     priceCatalystInput.addEventListener('input', function() {
-        handleInput(this, 'цены катализатора');
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        const value = parseFloat(this.value) || 0;
+        if (value > 100000) {
+            showModal(`Цена ${value.toLocaleString('ru-RU')} ₽ слишком высокая`, this);
+            isProcessing = false;
+            return;
+        }
+        
+        calculate();
+        saveAllData();
+        isProcessing = false;
     });
     
     // Обработчик налога
@@ -268,8 +322,21 @@ function initCalculator() {
         saveAllData();
     });
     
+    // ФИКС: проверка при загрузке данных
+    function safeLoadData() {
+        // Сначала грузим данные
+        loadSavedData();
+        
+        // Затем проверяем загруженные значения
+        setTimeout(() => {
+            checkLength(slastInput, 'сластены');
+            checkLength(dustInput, 'пыли');
+            checkLength(plasmaInput, 'плазмы');
+        }, 100);
+    }
+    
     // Загружаем сохраненные данные при запуске
-    loadSavedData();
+    safeLoadData();
     
     // Расчетная функция
     function calculate() {
