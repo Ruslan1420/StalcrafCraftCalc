@@ -30,6 +30,10 @@ function initCalculator() {
     const sugarCostElem = document.getElementById('sugar-cost');
     const catalystCostElem = document.getElementById('catalyst-cost');
     
+    // Элементы ошибок
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    
     // Константы крафта
     const CRAFT = {
         SUGAR: {
@@ -46,12 +50,45 @@ function initCalculator() {
         ENERGY_PER_CRAFT: 1200
     };
     
+    // Забавные сообщения
+    const funnyMessages = [
+        "Ты чего делаешь?",
+        "Ого! Серьезная партия!",
+        "Кто-то собрался крафтить на всю фракцию!",
+        "Не многовато ли?",
+        "Босс, ты уверен?",
+        "Столько ресурсов хватит на месяц!",
+        "Проверь расчеты еще раз",
+        "Может, поменьше?",
+        "Такой партией можно рынок обрушить!",
+        "Эй, полегче с ресурсами!"
+    ];
+    
+    // Получить случайное сообщение
+    function getRandomMessage() {
+        return funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+    }
+    
+    // Показать предупреждение
+    function showWarning(value, resourceName) {
+        if (value > 100000) {
+            errorText.textContent = `${getRandomMessage()} ${value.toLocaleString('ru-RU')} ${resourceName}?`;
+            errorMessage.style.display = 'flex';
+        } else if (value > 10000) {
+            errorText.textContent = `Большая партия: ${value.toLocaleString('ru-RU')} ${resourceName}`;
+            errorMessage.style.display = 'flex';
+        } else {
+            errorMessage.style.display = 'none';
+        }
+    }
+    
     // АВТОМАТИЧЕСКАЯ СВЯЗЬ РЕСУРСОВ:
     
     // При изменении сластены
     slastInput.addEventListener('input', function() {
         const slast = parseFloat(this.value) || 0;
-        // 10 сластены = 1 плазма = 300 пыли
+        showWarning(slast, 'сластены');
+        
         plasmaInput.value = Math.floor(slast / 10);
         dustInput.value = Math.floor(slast * 30);
         calculate();
@@ -60,7 +97,8 @@ function initCalculator() {
     // При изменении пыли
     dustInput.addEventListener('input', function() {
         const dust = parseFloat(this.value) || 0;
-        // 300 пыли = 10 сластены = 1 плазма
+        showWarning(dust, 'пыли');
+        
         slastInput.value = Math.floor(dust / 30);
         plasmaInput.value = Math.floor(dust / 300);
         calculate();
@@ -69,26 +107,59 @@ function initCalculator() {
     // При изменении плазмы
     plasmaInput.addEventListener('input', function() {
         const plasma = parseFloat(this.value) || 0;
-        // 1 плазма = 10 сластены = 300 пыли
+        showWarning(plasma, 'плазмы');
+        
         slastInput.value = plasma * 10;
         dustInput.value = plasma * 300;
         calculate();
     });
     
-    // Реакция на все изменения цен
-    const priceInputs = [
-        priceSlastInput, priceDustInput, pricePlasmaInput,
-        priceEnergyInput, priceCatalystInput, useTaxCheckbox
-    ];
-    
-    priceInputs.forEach(input => {
-        if (input) {
-            input.addEventListener('input', calculate);
-            if (input.type === 'checkbox') {
-                input.addEventListener('change', calculate);
-            }
+    // Проверка цен
+    function checkPrice(value, inputName) {
+        if (value > 1000000) {
+            errorText.textContent = `Цена ${value.toLocaleString('ru-RU')} ₽ за ${inputName}? Серьезно?`;
+            errorMessage.style.display = 'flex';
+        } else if (value > 100000) {
+            errorText.textContent = `Дороговато: ${value.toLocaleString('ru-RU')} ₽ за ${inputName}`;
+            errorMessage.style.display = 'flex';
         }
+    }
+    
+    // Реакция на все изменения цен
+    priceSlastInput.addEventListener('input', function() {
+        const value = parseFloat(this.value) || 0;
+        checkPrice(value, 'сластену');
+        calculate();
     });
+    
+    priceDustInput.addEventListener('input', function() {
+        const value = parseFloat(this.value) || 0;
+        checkPrice(value, 'пыль');
+        calculate();
+    });
+    
+    pricePlasmaInput.addEventListener('input', function() {
+        const value = parseFloat(this.value) || 0;
+        checkPrice(value, 'плазму');
+        calculate();
+    });
+    
+    priceEnergyInput.addEventListener('input', function() {
+        const value = parseFloat(this.value) || 0;
+        if (value > 100) {
+            errorText.textContent = `Энергия по ${value} ₽? Дороговато!`;
+            errorMessage.style.display = 'flex';
+        }
+        calculate();
+    });
+    
+    priceCatalystInput.addEventListener('input', function() {
+        const value = parseFloat(this.value) || 0;
+        checkPrice(value, 'катализатор');
+        calculate();
+    });
+    
+    useTaxCheckbox.addEventListener('change', calculate);
     
     // Расчетная функция
     function calculate() {
