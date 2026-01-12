@@ -595,23 +595,10 @@ input {
     display: inline-block;
 }
 
-/* Анимация для предупреждения */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-    20%, 40%, 60%, 80% { transform: translateX(2px); }
-}
-
 /* Стиль для инпутов при превышении лимита */
 input:invalid,
 input.max-length-exceeded {
     border-color: #ff4757 !important;
-    animation: shake 0.5s ease-in-out;
 }
 
 /* Подсказка при наведении на инпут */
