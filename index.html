@@ -24,7 +24,7 @@
                     <div class="price-control">
                         <label>Цена катализатора:</label>
                         <div class="price-input">
-                            <input type="number" id="price-catalyst" value="4135" min="0" step="10" maxlength="9">
+                            <input type="number" id="price-catalyst" value="4135" min="0" step="10" class="no-spinner">
                             <span>₽</span>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                                 <i class="fas fa-leaf"></i>
                                 <span>Мякоть сластены</span>
                             </div>
-                            <input type="number" id="input-slast" value="10" min="0" step="1" maxlength="9">
+                            <input type="number" id="input-slast" value="10" min="0" step="1" class="no-spinner">
                         </div>
                         
                         <div class="resource-item">
@@ -83,7 +83,7 @@
                                 <i class="fas fa-star"></i>
                                 <span>Аномальная пыль</span>
                             </div>
-                            <input type="number" id="input-dust" value="300" min="0" step="10" maxlength="9">
+                            <input type="number" id="input-dust" value="300" min="0" step="10" class="no-spinner">
                         </div>
                         
                         <div class="resource-item">
@@ -91,15 +91,16 @@
                                 <i class="fas fa-fire"></i>
                                 <span>Аномальная плазма</span>
                             </div>
-                            <input type="number" id="input-plasma" value="1" min="0" step="1" maxlength="9">
+                            <input type="number" id="input-plasma" value="1" min="0" step="1" class="no-spinner">
                         </div>
                         
-                        <div class="resource-output">
+                        <!-- Сахар теперь здесь -->
+                        <div class="resource-item">
                             <div class="resource-header">
                                 <i class="fas fa-cube"></i>
-                                <span>Полученный сахар</span>
+                                <span>Аномальный сахар</span>
                             </div>
-                            <div class="sugar-value" id="sugar-output">0</div>
+                            <input type="number" id="input-sugar" value="0" min="0" step="1" class="no-spinner">
                         </div>
                     </div>
                     
@@ -134,7 +135,7 @@
                                 <span>Мякоть сластены</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-slast" value="7800" min="0" step="10" maxlength="9">
+                                <input type="number" id="price-slast" value="7800" min="0" step="10" class="no-spinner">
                                 <span>₽</span>
                             </div>
                         </div>
@@ -145,7 +146,7 @@
                                 <span>Аномальная пыль</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-dust" value="275" min="0" step="1" maxlength="9">
+                                <input type="number" id="price-dust" value="275" min="0" step="1" class="no-spinner">
                                 <span>₽</span>
                             </div>
                         </div>
@@ -156,21 +157,12 @@
                                 <span>Аномальная плазма</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-plasma" value="1500" min="0" step="10" maxlength="9">
+                                <input type="number" id="price-plasma" value="1500" min="0" step="10" class="no-spinner">
                                 <span>₽</span>
                             </div>
                         </div>
                         
-                        <div class="price-item">
-                            <div class="price-header">
-                                <i class="fas fa-cube"></i>
-                                <span>Аномальный сахар</span>
-                            </div>
-                            <div class="price-input disabled">
-                                <input type="number" id="price-sugar" value="0" readonly>
-                                <span>₽</span>
-                            </div>
-                        </div>
+                        <!-- Убрано поле сахара -->
                     </div>
                     
                     <div class="energy-price">
@@ -179,19 +171,12 @@
                             <span>Энергия (1200 за крафт)</span>
                         </div>
                         <div class="price-input">
-                            <input type="number" id="price-energy" value="1.2" min="0" step="0.1" maxlength="9">
+                            <input type="text" id="price-energy" value="1.2" class="decimal-input" pattern="[0-9]+([\.,][0-9]{1,2})?">
                             <span>₽</span>
                         </div>
-                    </div>
-                    
-                    <div class="cost-summary">
-                        <div class="summary-item">
-                            <span>Себестоимость сахара:</span>
-                            <span id="sugar-cost">0 ₽</span>
-                        </div>
-                        <div class="summary-item">
-                            <span>Себестоимость катализатора:</span>
-                            <span id="catalyst-cost">0 ₽</span>
+                        <div class="energy-hint">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Вводите число с точкой или запятой</span>
                         </div>
                     </div>
                 </div>
