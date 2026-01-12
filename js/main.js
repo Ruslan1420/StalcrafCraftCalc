@@ -167,26 +167,14 @@ function initCalculator() {
         }
     });
     
-    // ПРОВЕРКА ТОЛЬКО ПРИ ВВОДЕ ПОЛЬЗОВАТЕЛЯ (не при загрузке!)
     function checkLength(inputElement, resourceName) {
-        const strValue = inputElement.value;
-        
-        // Проверяем только если пользователь ввел больше 9 символов
-        if (strValue && strValue.length > 9) {
-            showModal(`Осторожно! Вы ввели ${strValue.length} символов в поле "${resourceName}". Проверьте правильность ввода.`, inputElement);
-            return false;
-        }
-        
-        // Проверяем числовое значение
-        const numValue = parseFloat(strValue) || 0;
+        const numValue = parseFloat(inputElement.value) || 0;
         if (numValue > 1000000) {
             showModal(`Слишком большое значение: ${numValue.toLocaleString('ru-RU')} ${resourceName}`, inputElement);
             return false;
         }
-        
         return true;
     }
-    
     // Общая функция обработки ввода
     function handleInput(inputElement, resourceName, updateOtherInputs) {
         if (isProcessing) return;
@@ -419,3 +407,4 @@ function initCalculator() {
         return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
     }
 }
+
