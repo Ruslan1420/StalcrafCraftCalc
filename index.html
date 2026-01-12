@@ -24,7 +24,7 @@
                     <div class="price-control">
                         <label>Цена катализатора:</label>
                         <div class="price-input">
-                            <input type="number" id="price-catalyst" value="4135" min="0" step="10">
+                            <input type="number" id="price-catalyst" value="4135" min="0" step="10" maxlength="9">
                             <span>₽</span>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                                 <i class="fas fa-leaf"></i>
                                 <span>Мякоть сластены</span>
                             </div>
-                            <input type="number" id="input-slast" value="10" min="0" step="1">
+                            <input type="number" id="input-slast" value="10" min="0" step="1" maxlength="9">
                         </div>
                         
                         <div class="resource-item">
@@ -83,7 +83,7 @@
                                 <i class="fas fa-star"></i>
                                 <span>Аномальная пыль</span>
                             </div>
-                            <input type="number" id="input-dust" value="300" min="0" step="10">
+                            <input type="number" id="input-dust" value="300" min="0" step="10" maxlength="9">
                         </div>
                         
                         <div class="resource-item">
@@ -91,7 +91,7 @@
                                 <i class="fas fa-fire"></i>
                                 <span>Аномальная плазма</span>
                             </div>
-                            <input type="number" id="input-plasma" value="1" min="0" step="1">
+                            <input type="number" id="input-plasma" value="1" min="0" step="1" maxlength="9">
                         </div>
                         
                         <div class="resource-output">
@@ -134,7 +134,7 @@
                                 <span>Мякоть сластены</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-slast" value="7800" min="0" step="10">
+                                <input type="number" id="price-slast" value="7800" min="0" step="10" maxlength="9">
                                 <span>₽</span>
                             </div>
                         </div>
@@ -145,7 +145,7 @@
                                 <span>Аномальная пыль</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-dust" value="275" min="0" step="1">
+                                <input type="number" id="price-dust" value="275" min="0" step="1" maxlength="9">
                                 <span>₽</span>
                             </div>
                         </div>
@@ -156,7 +156,7 @@
                                 <span>Аномальная плазма</span>
                             </div>
                             <div class="price-input">
-                                <input type="number" id="price-plasma" value="1500" min="0" step="10">
+                                <input type="number" id="price-plasma" value="1500" min="0" step="10" maxlength="9">
                                 <span>₽</span>
                             </div>
                         </div>
@@ -179,7 +179,7 @@
                             <span>Энергия (1200 за крафт)</span>
                         </div>
                         <div class="price-input">
-                            <input type="number" id="price-energy" value="1.2" min="0" step="0.1">
+                            <input type="number" id="price-energy" value="1.2" min="0" step="0.1" maxlength="9">
                             <span>₽</span>
                         </div>
                     </div>
@@ -201,24 +201,6 @@
         <footer class="footer">
             <div>Stalcraft Catalyst Calculator</div>
         </footer>
-    </div>
-
-    <!-- Модальное окно -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Внимание!</h3>
-                <button class="modal-close" id="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-message" id="modal-message"></div>
-                <div class="modal-hint">Введено слишком большое значение</div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-ok" id="modal-ok">Понятно</button>
-            </div>
-        </div>
     </div>
 
     <!-- Подключаем скрипты -->
