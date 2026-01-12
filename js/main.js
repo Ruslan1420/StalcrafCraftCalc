@@ -43,32 +43,45 @@ function initCalculator() {
             DUST: 100,
             OUTPUT: 20
         },
-        ENERGY_PER_CRAFT: 1200  // 1200 энергии на каждый крафт
+        ENERGY_PER_CRAFT: 1200
     };
     
-    // Автоматический расчет пыли при вводе сластены (1:30 для катализатора)
+    // АВТОМАТИЧЕСКАЯ СВЯЗЬ РЕСУРСОВ:
+    
+    // При изменении сластены
     slastInput.addEventListener('input', function() {
         const slast = parseFloat(this.value) || 0;
-        // На 10 сластены нужно 300 пыли (100 на сахар + 200 на катализаторы)
+        // 10 сластены = 1 плазма = 300 пыли
+        plasmaInput.value = Math.floor(slast / 10);
         dustInput.value = Math.floor(slast * 30);
         calculate();
     });
     
-    // Автоматический расчет сластены при вводе пыли (30:1)
+    // При изменении пыли
     dustInput.addEventListener('input', function() {
         const dust = parseFloat(this.value) || 0;
+        // 300 пыли = 10 сластены = 1 плазма
         slastInput.value = Math.floor(dust / 30);
+        plasmaInput.value = Math.floor(dust / 300);
         calculate();
     });
     
-    // Реакция на все изменения
-    const allInputs = [
-        slastInput, dustInput, plasmaInput,
+    // При изменении плазмы
+    plasmaInput.addEventListener('input', function() {
+        const plasma = parseFloat(this.value) || 0;
+        // 1 плазма = 10 сластены = 300 пыли
+        slastInput.value = plasma * 10;
+        dustInput.value = plasma * 300;
+        calculate();
+    });
+    
+    // Реакция на все изменения цен
+    const priceInputs = [
         priceSlastInput, priceDustInput, pricePlasmaInput,
         priceEnergyInput, priceCatalystInput, useTaxCheckbox
     ];
     
-    allInputs.forEach(input => {
+    priceInputs.forEach(input => {
         if (input) {
             input.addEventListener('input', calculate);
             if (input.type === 'checkbox') {
@@ -195,6 +208,5 @@ function initCalculator() {
         return Math.round(amount).toLocaleString('ru-RU') + ' ₽';
     }
     
-    // Экспортируем функцию расчета
     window.calculate = calculate;
 }
